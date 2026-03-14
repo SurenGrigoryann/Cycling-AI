@@ -9,12 +9,12 @@ def get_db():
     return conn
 
 def register_user(username, email, password):
-    password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+   # password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     try:
         conn = get_db()
         conn.execute(
             "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
-            (username, email, password_hash)
+          #  (username, email, password_hash)
         )
         conn.commit()
         conn.close()
