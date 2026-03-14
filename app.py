@@ -106,6 +106,8 @@ def reset_password():
 def tutorial():
     return render_template('tutorial.html')
 
+print(os.environ.get("EMAIL_ADDRESS"))
+print(os.environ.get("EMAIL_PASSWORD"))
 
 if __name__ == '__main__':
     app.run(debug=True)
