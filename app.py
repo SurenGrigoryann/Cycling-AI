@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 import os
+import json
 import anthropic
 
 app = Flask(__name__)
@@ -14,14 +15,13 @@ def analyze():
     data = request.get_json()
     image_data = data.get('image')
 
-    # Strip the data URL prefix if present
     if ',' in image_data:
         image_data = image_data.split(',')[1]
 
     try:
         response = client.messages.create(
             model="claude-opus-4-6",
-            max_tokens=300,
+            max_tokens=200,
             messages=[
                 {
                     "role": "user",
@@ -36,14 +36,19 @@ def analyze():
                         },
                         {
                             "type": "text",
-                            "text": "What do you see in this image? Be concise and descriptive, max 2-3 sentences."
+                            "text": 'Identify the main item in this image. Respond ONLY with valid JSON, no markdown: {"item": "item name", "bin": "Garbage" or "Recycling" or "Organic", "explanation": "one short sentence why this bin is correct"}'
                         }
                     ]
                 }
             ]
         )
-        result = response.content[0].text
-        return jsonify({'result': result})
+        text = response.content[0].text.strip()
+        if '```' in text:
+            text = text.split('```')[1]
+            if text.startswith('json'):
+                text = text[4:]
+        result = json.loads(text)
+        return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
