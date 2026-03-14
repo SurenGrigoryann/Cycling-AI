@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Bin Buddy — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Syne+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080808;
+      --accent: #c8ff00;
+      --text: #f5f5f5;
+      --muted: #555;
+      --glass: rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.1);
+      --red: #ff3b30;
+      --green: #4caf50;
+    }
+
+    html, body {
+      width: 100%; min-height: 100%;
+      background: var(--bg);
+      font-family: 'Syne', sans-serif;
+      color: var(--text);
+    }
+
+    #bgCanvas {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      z-index: 0; opacity: 1;
+    }
+
+    .grain {
+      position: fixed; inset: 0; z-index: 1;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+      opacity: 0.7;
+    }
+
+    .scanlines {
+      position: fixed; inset: 0; z-index: 1;
+      pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px);
+    }
+
+    .page {
+      position: relative; z-index: 2;
+      width: 100%; min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 40px 28px;
+    }
+
+    /* ── LOGO ── */
+    .logo-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      margin-bottom: 32px;
+      opacity: 0; transform: translateY(-20px);
+      animation: slideDown 0.7s cubic-bezier(0.34, 1.4, 0.64, 1) 0.1s forwards;
+    }
+
+    .logo-icon-wrap { position: relative; margin-bottom: 16px; }
+
+    .logo-icon {
+      width: 64px; height: 64px; border-radius: 18px;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 1;
+      box-shadow: 0 0 0 0 rgba(200,255,0,0.4);
+      animation: pulse-ring 2.5s ease-out 1s infinite;
+    }
+
+    .logo-ring {
+      position: absolute; inset: -10px; border-radius: 28px;
+      border: 2px solid rgba(200,255,0,0.6);
+      animation: ring-expand 2s ease-out 1s infinite;
+    }
+    .logo-ring-2 {
+      position: absolute; inset: -22px; border-radius: 38px;
+      border: 1.5px solid rgba(200,255,0,0.35);
+      animation: ring-expand 2s ease-out 1.3s infinite;
+    }
+
+    @keyframes ring-expand {
+      0% { opacity: 1; transform: scale(0.92); }
+      100% { opacity: 0; transform: scale(1.35); }
+    }
+    @keyframes pulse-ring {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(200,255,0,0.5); }
+      50% { box-shadow: 0 0 40px 10px rgba(200,255,0,0.3); }
+    }
+
+    .logo-name {
+      font-size: 1.6rem; font-weight: 800;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 5px;
+      position: relative;
+      animation: glitch-1 6s ease-in-out infinite;
+    }
+
+    .logo-tagline {
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.55rem; letter-spacing: 0.28em;
+      color: var(--muted); text-transform: uppercase;
+    }
+
+    /* ── CARD ── */
+    .card {
+      width: 100%; max-width: 360px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 24px; padding: 28px 24px;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      opacity: 0; transform: translateY(24px);
+      animation: slideUp 0.7s cubic-bezier(0.34, 1.3, 0.64, 1) 0.25s forwards;
+      position: relative; overflow: hidden;
+    }
+
+    .card::before {
+      content: ''; position: absolute;
+      top: -80px; left: 50%; transform: translateX(-50%);
+      width: 280px; height: 160px;
+      background: radial-gradient(ellipse, rgba(200,255,0,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px; padding: 3px;
+      margin-bottom: 22px; position: relative;
+    }
+
+    .tab-slider {
+      position: absolute; top: 3px; bottom: 3px;
+      width: calc(50% - 3px);
+      background: var(--accent); border-radius: 9px;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+      left: 3px;
+    }
+    .tabs.on-register .tab-slider { transform: translateX(calc(100% + 0px)); }
+
+    .tab-btn {
+      flex: 1; padding: 9px; border: none; border-radius: 9px;
+      background: transparent;
+      font-family: 'Syne Mono', monospace; font-size: 0.6rem;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      cursor: pointer; position: relative; z-index: 1;
+      transition: color 0.25s; color: var(--muted);
+    }
+    .tab-btn.active { color: #000; font-weight: 700; }
+
+    /* ── FIELDS ── */
+    .fields { display: flex; flex-direction: column; gap: 10px; }
+
+    .field-wrap {
+      overflow: hidden; max-height: 0; opacity: 0;
+      transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1),
+                  opacity 0.3s ease, margin-bottom 0.3s ease;
+    }
+    .field-wrap.show { max-height: 60px; opacity: 1; }
+
+    /* Password strength wrapper — hidden by default, slides open on register */
+    .strength-wrap {
+      overflow: hidden; max-height: 0; opacity: 0;
+      transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
+    }
+    .strength-wrap.show { max-height: 200px; opacity: 1; }
+
+    .input-group { position: relative; }
+
+    .input-icon {
+      position: absolute; left: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted); pointer-events: none;
+      transition: color 0.2s;
+    }
+
+    /* Eye toggle button */
+    .eye-btn {
+      position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); padding: 4px;
+      display: flex; align-items: center; justify-content: center;
+      transition: color 0.2s; z-index: 2;
+      border-radius: 6px;
+    }
+    .eye-btn:hover { color: var(--accent); }
+
+    /* Confirm password match indicator */
+    .confirm-indicator {
+      position: absolute; right: 40px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.7rem; opacity: 0;
+      transition: opacity 0.2s, color 0.2s;
+      pointer-events: none;
+    }
+    .confirm-indicator.match { opacity: 1; color: var(--accent); }
+    .confirm-indicator.mismatch { opacity: 1; color: var(--red); }
+
+    .auth-input {
+      width: 100%;
+      padding: 13px 42px 13px 40px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; color: var(--text);
+      font-family: 'Syne', sans-serif; font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+    .auth-input::placeholder { color: var(--muted); font-size: 0.82rem; }
+    .auth-input:focus {
+      border-color: rgba(200,255,0,0.9);
+      background: rgba(200,255,0,0.06);
+      box-shadow: 0 0 0 3px rgba(200,255,0,0.18), 0 0 20px rgba(200,255,0,0.12);
+    }
+    .auth-input:focus ~ .input-icon,
+    .input-group:focus-within .input-icon { color: var(--accent); }
+
+    /* ── PASSWORD STRENGTH METER ── */
+    .strength-inner {
+      padding: 10px 2px 4px;
+    }
+
+    .strength-bar-track {
+      height: 4px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px; overflow: hidden;
+      margin-bottom: 7px;
+    }
+
+    .strength-bar-fill {
+      height: 100%; width: 0%;
+      border-radius: 4px;
+      transition: width 0.35s cubic-bezier(0.34,1.2,0.64,1), background-color 0.3s ease;
+      background: var(--muted);
+    }
+
+    .strength-label {
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.58rem; letter-spacing: 0.1em;
+      color: var(--muted); text-transform: uppercase;
+      margin-bottom: 8px;
+      transition: color 0.3s;
+    }
+
+    .requirements {
+      list-style: none; padding: 0; margin: 0;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 3px 8px;
+    }
+
+    .requirements li {
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.55rem; letter-spacing: 0.06em;
+      color: rgba(255,255,255,0.2);
+      display: flex; align-items: center; gap: 5px;
+      transition: color 0.25s;
+    }
+
+    .requirements li::before {
+      content: '○';
+      font-size: 0.5rem;
+      transition: content 0.2s, color 0.25s;
+      flex-shrink: 0;
+    }
+
+    .requirements li.met {
+      color: var(--accent);
+    }
+    .requirements li.met::before { content: '●'; }
+
+    /* Strength color states */
+    .strength-bar-fill.s1 { background: #ff3b30; }
+    .strength-bar-fill.s2 { background: #ff6b35; }
+    .strength-bar-fill.s3 { background: #f1c40f; }
+    .strength-bar-fill.s4 { background: #7ed321; }
+    .strength-bar-fill.s5 { background: var(--accent); }
+
+    /* ── MESSAGE ── */
+    .auth-message {
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.08em;
+      text-align: center; min-height: 16px;
+      margin: 6px 0 2px;
+      transition: all 0.3s; opacity: 0;
+    }
+    .auth-message.show { opacity: 1; }
+    .auth-message.error { color: var(--red); }
+    .auth-message.success { color: var(--green); }
+
+    /* ── SUBMIT BUTTON ── */
+    .auth-submit {
+      width: 100%; margin-top: 10px; padding: 14px;
+      border-radius: 12px; border: none;
+      background: var(--accent); color: #000;
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: 0.82rem; letter-spacing: 0.12em;
+      text-transform: uppercase; cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+    }
+    .auth-submit:hover {
+      box-shadow: 0 4px 24px rgba(200,255,0,0.3);
+      transform: translateY(-1px);
+    }
+    .auth-submit:active { transform: scale(0.97) translateY(0); }
+    .auth-submit:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .auth-submit::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.35) 50%, transparent 60%);
+      transform: translateX(-100%); transition: transform 0s;
+    }
+    .auth-submit:not(:disabled):hover::after {
+      transform: translateX(100%); transition: transform 0.5s ease;
+    }
+
+    .btn-content { display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-spinner {
+      display: none; width: 14px; height: 14px;
+      border: 2px solid rgba(0,0,0,0.2); border-top-color: #000;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+    }
+    .auth-submit.loading .btn-label { display: none; }
+    .auth-submit.loading .btn-spinner { display: block; }
+
+    /* ── PARTICLES ── */
+    .particle {
+      position: fixed; border-radius: 50%;
+      pointer-events: none; z-index: 1;
+      animation: float-up linear infinite; opacity: 0;
+    }
+
+    @keyframes float-up {
+      0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 0.4; }
+      100% { transform: translateY(-100vh) translateX(var(--dx)) rotate(360deg); opacity: 0; }
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes glitch-1 {
+      0%, 95%, 100% { clip-path: none; transform: none; }
+      96% { clip-path: inset(20% 0 60% 0); transform: translateX(-4px); }
+      97% { clip-path: inset(60% 0 10% 0); transform: translateX(4px); }
+      98% { clip-path: inset(40% 0 40% 0); transform: translateX(-2px); }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="bgCanvas"></canvas>
+  <div class="grain"></div>
+  <div class="scanlines"></div>
+
+  <div class="page">
+    <div class="logo-wrap">
+      <div class="logo-icon-wrap">
+        <div class="logo-ring"></div>
+        <div class="logo-ring-2"></div>
+        <div class="logo-icon">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4v5h5"/>
+            <path d="M20 20v-5h-5"/>
+            <path d="M4 9a9 9 0 0114.93-2.69M20 15A9 9 0 015.07 17.69"/>
+          </svg>
+        </div>
+      </div>
+      <div class="logo-name">Bin Buddy</div>
+      <div class="logo-tagline">Sort smarter, not harder</div>
+    </div>
+
+    <div class="card">
+      <div class="tabs" id="tabsEl">
+        <div class="tab-slider" id="tabSlider"></div>
+        <button class="tab-btn active" id="loginTab" onclick="switchTab('login')">Login</button>
+        <button class="tab-btn" id="registerTab" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <div class="fields">
+        <!-- Email — register only -->
+        <div class="field-wrap" id="emailWrap">
+          <div class="input-group">
+            <input class="auth-input" id="emailInput" type="email" placeholder="Email" autocomplete="email"/>
+            <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Username — always visible -->
+        <div class="input-group">
+          <input class="auth-input" id="usernameInput" type="text" placeholder="Username" autocomplete="username"/>
+          <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+
+        <!-- Password — always visible -->
+        <div class="input-group">
+          <input class="auth-input" id="passwordInput" type="password" placeholder="Password" autocomplete="current-password"/>
+          <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <button class="eye-btn" type="button" onclick="toggleVis('passwordInput', this)" tabindex="-1">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+
+        <!-- Confirm password — register only -->
+        <div class="field-wrap" id="confirmWrap">
+          <div class="input-group">
+            <input class="auth-input" id="confirmInput" type="password" placeholder="Confirm password" autocomplete="new-password"/>
+            <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span class="confirm-indicator" id="confirmIndicator"></span>
+            <button class="eye-btn" type="button" onclick="toggleVis('confirmInput', this)" tabindex="-1">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Password strength meter — register only -->
+        <div class="strength-wrap" id="strengthWrap">
+          <div class="strength-inner">
+            <div class="strength-bar-track">
+              <div class="strength-bar-fill" id="strengthBar"></div>
+            </div>
+            <p class="strength-label" id="strengthLabel">Enter a password</p>
+            <ul class="requirements">
+              <li id="req-length">12+ characters</li>
+              <li id="req-upper">Uppercase letter</li>
+              <li id="req-lower">Lowercase letter</li>
+              <li id="req-number">Number</li>
+              <li id="req-special">Special character</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-message" id="authMessage"></div>
+
+      <button class="auth-submit" id="authSubmit" onclick="handleAuth()">
+        <div class="btn-content">
+          <span class="btn-label">Login</span>
+          <div class="btn-spinner"></div>
+        </div>
+      </button>
+
+      <p id="forgotLink" style="text-align:center;margin-top:14px;">
+        <a onclick="openReset()" style="font-family:'Syne Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;color:var(--muted);text-decoration:none;cursor:pointer;text-transform:uppercase;transition:color 0.2s;"
+           onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">
+          Forgot password?
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Email verification modal -->
+  <div id="verifyOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:24px;">
+    <div style="background:#0f0f0f;border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:28px 24px;width:100%;max-width:340px;position:relative;">
+      <h3 style="font-family:'Syne Mono',monospace;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">Verify Email</h3>
+      <p style="font-size:0.75rem;color:var(--muted);margin-bottom:18px;">Enter the 6-digit code sent to your email.</p>
+      <input id="verifyCode" class="auth-input" type="text" placeholder="6-digit code" maxlength="6" style="padding:13px 14px;margin-bottom:10px;letter-spacing:6px;text-align:center;font-size:1.1rem;"/>
+      <div id="verifyMsg" style="font-family:'Syne Mono',monospace;font-size:0.6rem;min-height:16px;margin-bottom:8px;text-align:center;letter-spacing:0.08em;"></div>
+      <button onclick="submitVerify()" class="auth-submit" style="margin-top:4px;">Verify Account</button>
+    </div>
+  </div>
+
+  <!-- Reset password modal -->
+  <div id="resetOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:24px;">
+    <div style="background:#0f0f0f;border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:28px 24px;width:100%;max-width:340px;position:relative;">
+      <button onclick="closeReset()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;line-height:1;transition:color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">✕</button>
+
+      <!-- Step 1: enter email -->
+      <div id="resetStep1">
+        <h3 style="font-family:'Syne Mono',monospace;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">Reset Password</h3>
+        <p style="font-size:0.75rem;color:var(--muted);margin-bottom:18px;">Enter your email and we'll send a reset code.</p>
+        <input id="resetEmail" class="auth-input" type="email" placeholder="Your email" style="padding:13px 14px;margin-bottom:10px;"/>
+        <div id="resetMsg1" style="font-family:'Syne Mono',monospace;font-size:0.6rem;min-height:16px;margin-bottom:8px;text-align:center;letter-spacing:0.08em;"></div>
+        <button onclick="sendResetCode()" class="auth-submit" style="margin-top:4px;">Send Code</button>
+      </div>
+
+      <!-- Step 2: enter code + new password -->
+      <div id="resetStep2" style="display:none;">
+        <h3 style="font-family:'Syne Mono',monospace;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">Enter Code</h3>
+        <p style="font-size:0.75rem;color:var(--muted);margin-bottom:18px;">Check your email for the 6-digit code.</p>
+        <input id="resetCode" class="auth-input" type="text" placeholder="6-digit code" maxlength="6" style="padding:13px 14px;margin-bottom:10px;letter-spacing:6px;text-align:center;font-size:1.1rem;"/>
+        <input id="resetNewPw" class="auth-input" type="password" placeholder="New password" style="padding:13px 14px;margin-bottom:10px;"/>
+        <input id="resetConfirmPw" class="auth-input" type="password" placeholder="Confirm new password" style="padding:13px 14px;margin-bottom:10px;"/>
+        <div id="resetMsg2" style="font-family:'Syne Mono',monospace;font-size:0.6rem;min-height:16px;margin-bottom:8px;text-align:center;letter-spacing:0.08em;"></div>
+        <button onclick="submitReset()" class="auth-submit" style="margin-top:4px;">Reset Password</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if (localStorage.getItem('bb_token')) window.location.href = '/';
+
+    // ── Canvas background ──
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, nodes = [], time = 0;
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      initNodes();
+    }
+    window.addEventListener('resize', resize);
+
+    function initNodes() {
+      nodes = [];
+      const cols = 10, rows = 16;
+      for (let r = 0; r <= rows; r++) {
+        for (let c = 0; c <= cols; c++) {
+          nodes.push({
+            bx: (c / cols) * W, by: (r / rows) * H,
+            phase: Math.random() * Math.PI * 2,
+            speed: 0.3 + Math.random() * 0.4,
+            amp: 6 + Math.random() * 10
+          });
+        }
+      }
+    }
+
+    function getPos(n, t) {
+      return {
+        x: n.bx + Math.sin(t * n.speed + n.phase) * n.amp,
+        y: n.by + Math.cos(t * n.speed * 0.7 + n.phase) * n.amp * 0.6
+      };
+    }
+
+    function drawBg(t) {
+      ctx.clearRect(0, 0, W, H);
+      const cols = 10;
+      nodes.forEach((n, i) => {
+        const col = i % (cols + 1);
+        const row = Math.floor(i / (cols + 1));
+        const p = getPos(n, t);
+        if (col < cols) {
+          const r = getPos(nodes[i + 1], t);
+          const dist = Math.hypot(r.x - p.x, r.y - p.y);
+          const alpha = Math.max(0, 0.22 - dist / 1200);
+          ctx.strokeStyle = `rgba(200,255,0,${alpha})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(r.x, r.y); ctx.stroke();
+        }
+        if (row < Math.floor(nodes.length / (cols + 1)) - 1) {
+          const d = getPos(nodes[i + (cols + 1)], t);
+          const dist = Math.hypot(d.x - p.x, d.y - p.y);
+          const alpha = Math.max(0, 0.22 - dist / 1200);
+          ctx.strokeStyle = `rgba(200,255,0,${alpha})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(d.x, d.y); ctx.stroke();
+        }
+        const glow = (Math.sin(t * n.speed + n.phase) + 1) / 2;
+        const dotR = 1.5 + glow * 2.5;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, dotR, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200,255,0,${0.3 + glow * 0.55})`;
+        ctx.fill();
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, dotR * 5);
+        grad.addColorStop(0, `rgba(200,255,0,${0.12 + glow * 0.15})`);
+        grad.addColorStop(1, 'rgba(200,255,0,0)');
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, dotR * 5, 0, Math.PI * 2);
+        ctx.fillStyle = grad; ctx.fill();
+      });
+      const vg = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)*0.7);
+      vg.addColorStop(0, 'rgba(8,8,8,0)');
+      vg.addColorStop(0.6, 'rgba(8,8,8,0.2)');
+      vg.addColorStop(1, 'rgba(8,8,8,0.65)');
+      ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+    }
+
+    resize();
+    function loop() { time += 0.008; drawBg(time); requestAnimationFrame(loop); }
+    loop();
+
+    // ── Particles ──
+    function spawnParticle() {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = 4 + Math.random() * 10;
+      const x = Math.random() * 100;
+      const dx = (Math.random() - 0.5) * 90;
+      const dur = 6 + Math.random() * 8;
+      const delay = Math.random() * 2;
+      const opacity = 0.5 + Math.random() * 0.4;
+      p.style.cssText = `width:${size}px;height:${size}px;left:${x}vw;bottom:-20px;background:rgba(200,255,0,${opacity});--dx:${dx}px;animation-duration:${dur}s;animation-delay:${delay}s;box-shadow:0 0 ${size*3}px ${size}px rgba(200,255,0,${opacity*0.5});`;
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), (dur + delay) * 1000);
+    }
+    for (let i = 0; i < 16; i++) spawnParticle();
+    setInterval(spawnParticle, 800);
+
+    // ── Floating icons ──
+    const recyclingIcons = [
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v5h5"/><path d="M20 20v-5h-5"/><path d="M4 9a9 9 0 0114.93-2.69M20 15A9 9 0 015.07 17.69"/></svg>`,
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>`,
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12C12 7 7 4 3 6c0 5 4 8 9 6"/><path d="M12 12c0-5 5-8 9-6-1 5-5 8-9 6"/></svg>`,
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+    ];
+
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `@keyframes icon-float { 0% { transform: translateY(0) translateX(0) rotate(var(--r0)); opacity: 0; } 8% { opacity: 1; } 90% { opacity: 0.6; } 100% { transform: translateY(-105vh) translateX(var(--dx)) rotate(var(--r1)); opacity: 0; } }`;
+    document.head.appendChild(styleEl);
+
+    function spawnIcon() {
+      const wrap = document.createElement('div');
+      const size = 18 + Math.random() * 22;
+      const x = Math.random() * 90 + 5;
+      const dx = (Math.random() - 0.5) * 80;
+      const dur = 9 + Math.random() * 10;
+      const delay = Math.random() * 3;
+      const opacity = 0.08 + Math.random() * 0.13;
+      const rotate = Math.random() * 360;
+      const rotateEnd = rotate + (Math.random() - 0.5) * 180;
+      wrap.style.cssText = `position:fixed;width:${size}px;height:${size}px;left:${x}vw;bottom:-${size+10}px;color:rgba(200,255,0,${opacity});z-index:1;pointer-events:none;animation:icon-float ${dur}s linear ${delay}s forwards;--dx:${dx}px;--r0:${rotate}deg;--r1:${rotateEnd}deg;`;
+      wrap.innerHTML = recyclingIcons[Math.floor(Math.random() * recyclingIcons.length)];
+      document.body.appendChild(wrap);
+      setTimeout(() => wrap.remove(), (dur + delay) * 1000);
+    }
+    for (let i = 0; i < 8; i++) spawnIcon();
+    setInterval(spawnIcon, 1800);
+
+    // ── Show/hide password toggle ──
+    const eyeHide = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+    const eyeShow = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+
+    function toggleVis(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      btn.innerHTML = isHidden ? eyeHide : eyeShow;
+      btn.style.color = isHidden ? 'var(--accent)' : 'var(--muted)';
+    }
+
+    // ── Confirm password live match check ──
+    document.getElementById('confirmInput').addEventListener('input', checkConfirm);
+    document.getElementById('passwordInput').addEventListener('input', () => {
+      if (document.getElementById('confirmInput').value) checkConfirm();
+    });
+
+    function checkConfirm() {
+      const pw = document.getElementById('passwordInput').value;
+      const cf = document.getElementById('confirmInput').value;
+      const ind = document.getElementById('confirmIndicator');
+      if (!cf) { ind.className = 'confirm-indicator'; ind.textContent = ''; return; }
+      if (pw === cf) { ind.className = 'confirm-indicator match'; ind.textContent = '✓'; }
+      else { ind.className = 'confirm-indicator mismatch'; ind.textContent = '✗'; }
+    }
+
+    // ── Password strength meter ──
+    const strengthLabels = ['', 'Very weak', 'Weak', 'Fair', 'Strong', 'Very strong'];
+    const strengthClasses = ['', 's1', 's2', 's3', 's4', 's5'];
+
+    document.getElementById('passwordInput').addEventListener('input', function () {
+      if (currentTab !== 'register') return;
+      const val = this.value;
+
+      const checks = {
+        'req-length':  val.length >= 12,
+        'req-upper':   /[A-Z]/.test(val),
+        'req-lower':   /[a-z]/.test(val),
+        'req-number':  /\d/.test(val),
+        'req-special': /[!@#$%^&*(),.?":{}|<>]/.test(val),
+      };
+
+      let met = 0;
+      for (const [id, passed] of Object.entries(checks)) {
+        const el = document.getElementById(id);
+        el.classList.toggle('met', passed);
+        if (passed) met++;
+      }
+
+      const bar = document.getElementById('strengthBar');
+      const label = document.getElementById('strengthLabel');
+
+      bar.style.width = val.length === 0 ? '0%' : `${(met / 5) * 100}%`;
+      bar.className = 'strength-bar-fill' + (val.length > 0 ? ` ${strengthClasses[met]}` : '');
+      label.textContent = val.length === 0 ? 'Enter a password' : strengthLabels[met];
+      label.style.color = met >= 4 ? 'var(--accent)' : met >= 3 ? '#f1c40f' : met >= 1 ? '#ff6b35' : 'var(--muted)';
+    });
+
+    // ── Tab switching ──
+    let currentTab = 'login';
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById('loginTab').classList.toggle('active', tab === 'login');
+      document.getElementById('registerTab').classList.toggle('active', tab === 'register');
+      document.getElementById('tabsEl').classList.toggle('on-register', tab === 'register');
+      document.querySelector('.btn-label').textContent = tab === 'login' ? 'Login' : 'Create Account';
+      document.getElementById('emailWrap').classList.toggle('show', tab === 'register');
+      document.getElementById('confirmWrap').classList.toggle('show', tab === 'register');
+      document.getElementById('strengthWrap').classList.toggle('show', tab === 'register');
+
+      // Reset strength meter on tab switch
+      if (tab === 'login') {
+        document.getElementById('strengthBar').style.width = '0%';
+        document.getElementById('strengthBar').className = 'strength-bar-fill';
+        document.getElementById('strengthLabel').textContent = 'Enter a password';
+        document.getElementById('strengthLabel').style.color = 'var(--muted)';
+        document.querySelectorAll('.requirements li').forEach(li => li.classList.remove('met'));
+      }
+
+      clearMsg();
+      document.getElementById('usernameInput').value = '';
+      document.getElementById('passwordInput').value = '';
+      document.getElementById('emailInput').value = '';
+      document.getElementById('confirmInput').value = '';
+      document.getElementById('confirmIndicator').className = 'confirm-indicator';
+      // Reset eye buttons
+      document.querySelectorAll('.eye-btn').forEach(btn => {
+        btn.innerHTML = eyeShow; btn.style.color = 'var(--muted)';
+      });
+      document.getElementById('passwordInput').type = 'password';
+      document.getElementById('confirmInput').type = 'password';
+    }
+
+    // ── Auth logic ──
+    async function handleAuth() {
+      const username = document.getElementById('usernameInput').value.trim();
+      const password = document.getElementById('passwordInput').value;
+      const email = document.getElementById('emailInput').value.trim();
+      const btn = document.getElementById('authSubmit');
+
+      if (!username || !password) { setMsg('Fill in all fields', 'error'); return; }
+      if (currentTab === 'register' && !email) { setMsg('Email is required', 'error'); return; }
+      if (currentTab === 'register') {
+        const confirm = document.getElementById('confirmInput').value;
+        if (!confirm) { setMsg('Please confirm your password', 'error'); return; }
+        if (password !== confirm) { setMsg('Passwords do not match', 'error'); return; }
+      }
+
+      btn.disabled = true; btn.classList.add('loading');
+      clearMsg();
+
+      try {
+        const endpoint = currentTab === 'login' ? '/login' : '/register';
+        const body = currentTab === 'login' ? { username, password } : { username, email, password };
+
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+
+        if (currentTab === 'register') {
+          if (data.success) {
+            setMsg('Check your email for a verification code.', 'success');
+            btn.disabled = false; btn.classList.remove('loading');
+            openVerify(email);
+          } else {
+            setMsg(data.message || 'Registration failed', 'error');
+            btn.disabled = false; btn.classList.remove('loading');
+          }
+        } else {
+          if (data.success && data.token) {
+            localStorage.setItem('bb_token', data.token);
+            setMsg('Welcome back!', 'success');
+            setTimeout(() => window.location.href = '/', 700);
+          } else {
+            setMsg(data.message || 'Invalid credentials', 'error');
+            btn.disabled = false; btn.classList.remove('loading');
+            const card = document.querySelector('.card');
+            card.style.transition = 'transform 0.08s';
+            card.style.transform = 'translateX(-8px)';
+            setTimeout(() => { card.style.transform = 'translateX(8px)'; }, 80);
+            setTimeout(() => { card.style.transform = 'translateX(-4px)'; }, 160);
+            setTimeout(() => { card.style.transform = 'translateX(0)'; }, 240);
+          }
+        }
+      } catch {
+        setMsg('Connection error', 'error');
+        btn.disabled = false; btn.classList.remove('loading');
+      }
+    }
+
+    async function autoLogin(username, password) {
+      try {
+        const res = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (data.success && data.token) {
+          localStorage.setItem('bb_token', data.token);
+          window.location.href = '/';
+        } else { switchTab('login'); }
+      } catch { switchTab('login'); }
+    }
+
+    function setMsg(msg, type) {
+      const el = document.getElementById('authMessage');
+      el.textContent = msg; el.className = `auth-message show ${type}`;
+    }
+    function clearMsg() {
+      const el = document.getElementById('authMessage');
+      el.textContent = ''; el.className = 'auth-message';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') handleAuth(); });
+
+    // ── Email verification modal ──
+    let verifyEmail = '';
+
+    function openVerify(email) {
+      verifyEmail = email;
+      document.getElementById('verifyOverlay').style.display = 'flex';
+      document.getElementById('verifyCode').value = '';
+      document.getElementById('verifyMsg').textContent = '';
+    }
+
+    async function submitVerify() {
+      const code = document.getElementById('verifyCode').value.trim();
+      const msg  = document.getElementById('verifyMsg');
+      if (!code || code.length !== 6) { msg.style.color = 'var(--red)'; msg.textContent = 'Enter the 6-digit code'; return; }
+
+      msg.style.color = 'var(--muted)'; msg.textContent = 'Verifying...';
+      try {
+        const res = await fetch('/verify', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: verifyEmail, code })
+        });
+        const data = await res.json();
+        if (data.success) {
+          msg.style.color = 'var(--green)'; msg.textContent = 'Verified! Redirecting to login...';
+          setTimeout(() => {
+            document.getElementById('verifyOverlay').style.display = 'none';
+            switchTab('login');
+          }, 1500);
+        } else {
+          msg.style.color = 'var(--red)'; msg.textContent = data.message;
+        }
+      } catch {
+        msg.style.color = 'var(--red)'; msg.textContent = 'Connection error';
+      }
+    }
+
+    // ── Password reset modal ──
+    function openReset() {
+      const o = document.getElementById('resetOverlay');
+      o.style.display = 'flex';
+      document.getElementById('resetStep1').style.display = 'block';
+      document.getElementById('resetStep2').style.display = 'none';
+      document.getElementById('resetEmail').value = '';
+      document.getElementById('resetMsg1').textContent = '';
+    }
+
+    function closeReset() {
+      document.getElementById('resetOverlay').style.display = 'none';
+    }
+
+    // Close modal when clicking the backdrop
+    document.getElementById('resetOverlay').addEventListener('click', function(e) {
+      if (e.target === this) closeReset();
+    });
+
+    async function sendResetCode() {
+      const email = document.getElementById('resetEmail').value.trim();
+      const msg = document.getElementById('resetMsg1');
+      if (!email) { msg.style.color = 'var(--red)'; msg.textContent = 'Enter your email'; return; }
+
+      msg.style.color = 'var(--muted)'; msg.textContent = 'Sending...';
+      try {
+        const res = await fetch('/forgot-password', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('resetStep1').style.display = 'none';
+          document.getElementById('resetStep2').style.display = 'block';
+          document.getElementById('resetMsg2').textContent = '';
+        } else {
+          msg.style.color = 'var(--red)'; msg.textContent = data.message;
+        }
+      } catch {
+        msg.style.color = 'var(--red)'; msg.textContent = 'Connection error';
+      }
+    }
+
+    async function submitReset() {
+      const email    = document.getElementById('resetEmail').value.trim();
+      const code     = document.getElementById('resetCode').value.trim();
+      const newPw    = document.getElementById('resetNewPw').value;
+      const confirm  = document.getElementById('resetConfirmPw').value;
+      const msg      = document.getElementById('resetMsg2');
+
+      if (!code || code.length !== 6) { msg.style.color = 'var(--red)'; msg.textContent = 'Enter the 6-digit code'; return; }
+      if (!newPw) { msg.style.color = 'var(--red)'; msg.textContent = 'Enter a new password'; return; }
+      if (newPw !== confirm) { msg.style.color = 'var(--red)'; msg.textContent = 'Passwords do not match'; return; }
+
+      msg.style.color = 'var(--muted)'; msg.textContent = 'Verifying...';
+      try {
+        const res = await fetch('/reset-password', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, code, new_password: newPw })
+        });
+        const data = await res.json();
+        if (data.success) {
+          msg.style.color = 'var(--green)'; msg.textContent = 'Password updated! You can now log in.';
+          setTimeout(closeReset, 1800);
+        } else {
+          msg.style.color = 'var(--red)'; msg.textContent = data.message;
+        }
+      } catch {
+        msg.style.color = 'var(--red)'; msg.textContent = 'Connection error';
+      }
+    }
+  </script>
+</body>
+</html>
