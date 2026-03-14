@@ -1,34 +1,36 @@
 from flask import Flask, render_template, request, jsonify
 import os
-import base64
-from openai import OpenAI
- 
+import anthropic
+
 app = Flask(__name__)
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
- 
+client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+
 @app.route('/')
 def index():
     return render_template('index.html')
- 
+
 @app.route('/analyze', methods=['POST'])
 def analyze():
     data = request.get_json()
-    image_data = data.get('image')  # base64 image
- 
+    image_data = data.get('image')
+
     # Strip the data URL prefix if present
     if ',' in image_data:
         image_data = image_data.split(',')[1]
- 
-    response = client.chat.completions.create(
-        model="gpt-4o",
+
+    response = client.messages.create(
+        model="claude-opus-4-6",
+        max_tokens=300,
         messages=[
             {
                 "role": "user",
                 "content": [
                     {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{image_data}"
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": "image/jpeg",
+                            "data": image_data
                         }
                     },
                     {
@@ -37,12 +39,11 @@ def analyze():
                     }
                 ]
             }
-        ],
-        max_tokens=200
+        ]
     )
- 
-    result = response.choices[0].message.content
+
+    result = response.content[0].text
     return jsonify({'result': result})
- 
+
 if __name__ == '__main__':
     app.run(debug=True)
