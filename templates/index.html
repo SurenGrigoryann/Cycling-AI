@@ -168,6 +168,52 @@
       text-transform: uppercase;
     }
 
+    /* UNCLEAR PANEL */
+    .unclear-panel {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 10;
+      padding: 36px 24px max(env(safe-area-inset-bottom), 36px);
+      background: linear-gradient(to top, rgba(0,0,0,0.97) 60%, transparent 100%);
+      transform: translateY(100%);
+      transition: transform 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
+      text-align: center;
+    }
+    .unclear-panel.show { transform: translateY(0); }
+    .unclear-icon {
+      font-size: 2.8rem;
+      margin-bottom: 12px;
+    }
+    .unclear-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .unclear-subtitle {
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .retake-unclear-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass);
+      color: var(--text);
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+    }
+    .retake-unclear-btn:active { opacity: 0.7; }
+
     /* GAME PANEL */
     .game-panel {
       position: fixed;
@@ -414,11 +460,19 @@
     </div>
   </div>
 
+  <!-- Unclear panel -->
+  <div class="unclear-panel" id="unclearPanel">
+    <div class="unclear-icon">🔍</div>
+    <div class="unclear-title">Can't identify this</div>
+    <div class="unclear-subtitle" id="unclearItem"></div>
+    <button class="retake-unclear-btn" onclick="retake()">Try a clearer photo</button>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script>
     let stream = null;
-    let state = 'off'; // off | live | frozen | choosing | revealed
+    let state = 'off'; // off | live | frozen | choosing | revealed | unclear
     let correctBin = null;
     let explanationText = null;
 
@@ -431,6 +485,8 @@
     const bottomBar = document.getElementById('bottomBar');
     const analyzingOverlay = document.getElementById('analyzingOverlay');
     const gamePanel = document.getElementById('gamePanel');
+    const unclearPanel = document.getElementById('unclearPanel');
+    const unclearItem = document.getElementById('unclearItem');
     const itemName = document.getElementById('itemName');
     const explainBox = document.getElementById('explainBox');
     const verdict = document.getElementById('verdict');
@@ -492,6 +548,17 @@
           return;
         }
 
+        analyzingOverlay.classList.remove('show');
+
+        if (data.confident === false) {
+          unclearItem.textContent = data.item
+            ? `Detected "${data.item}" but not confident enough to sort it.`
+            : 'The image is too blurry or unclear to identify.';
+          unclearPanel.classList.add('show');
+          state = 'unclear';
+          return;
+        }
+
         correctBin = data.bin;
         explanationText = data.explanation;
         itemName.textContent = data.item;
@@ -502,8 +569,6 @@
           card.onclick = () => chooseBin(card.dataset.bin);
         });
         explainBox.classList.remove('show');
-
-        analyzingOverlay.classList.remove('show');
         gamePanel.classList.add('show');
         state = 'choosing';
       } catch (err) {
@@ -546,6 +611,7 @@
       video.classList.remove('frozen');
       analyzingOverlay.classList.remove('show');
       gamePanel.classList.remove('show');
+      unclearPanel.classList.remove('show');
       bottomBar.classList.remove('hidden');
       livePill.classList.add('show');
       shutterBtn.disabled = false;
