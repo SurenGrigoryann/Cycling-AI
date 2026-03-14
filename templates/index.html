@@ -1,153 +1,398 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Camera</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <title>Vision</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Syne+Mono&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
     :root {
-      --bg: #000;
+      --bg: #080808;
+      --surface: #111;
+      --accent: #c8ff00;
+      --accent-dim: rgba(200,255,0,0.15);
+      --text: #f5f5f5;
+      --muted: #555;
+      --glass: rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.1);
       --red: #ff3b30;
-      --glass: rgba(255,255,255,0.12);
-      --glass-border: rgba(255,255,255,0.18);
     }
+ 
     html, body {
       width: 100%; height: 100%;
       overflow: hidden;
-      background: #000;
-      font-family: 'DM Sans', sans-serif;
-      color: #fff;
+      background: var(--bg);
+      font-family: 'Syne', sans-serif;
+      color: var(--text);
     }
+ 
+    /* ── VIDEO ── */
     #video {
-      position: fixed; inset: 0;
+      position: fixed;
+      inset: 0;
       width: 100%; height: 100%;
-      object-fit: cover; z-index: 0;
+      object-fit: cover;
+      z-index: 0;
+      transition: filter 0.3s;
     }
-    #overlay {
+ 
+    #video.frozen { display: none; }
+ 
+    #snapshot {
+      position: fixed;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      display: none;
+    }
+    #snapshot.visible { display: block; }
+ 
+    /* ── DARK SCREEN ── */
+    #offScreen {
       position: fixed; inset: 0;
-      background: #000; z-index: 1;
+      background: var(--bg);
+      z-index: 1;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      gap: 16px; transition: opacity 0.4s ease;
+      gap: 16px;
+      transition: opacity 0.4s;
     }
-    #overlay.hidden { opacity: 0; pointer-events: none; }
-    #overlay svg { opacity: 0.3; }
-    #overlay p { font-size: 0.85rem; opacity: 0.4; letter-spacing: 0.05em; }
-    .top-bar {
-      position: fixed; top: 0; left: 0; right: 0;
-      padding: env(safe-area-inset-top, 16px) 20px 16px;
-      display: flex; align-items: center; justify-content: space-between;
+    #offScreen.hidden { opacity: 0; pointer-events: none; }
+ 
+    .off-icon { opacity: 0.15; }
+    .off-label {
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+ 
+    /* ── TOP BAR ── */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      padding: max(env(safe-area-inset-top), 16px) 20px 14px;
       z-index: 10;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
     }
-    .live-badge {
+ 
+    .app-name {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+ 
+    .live-pill {
       display: flex; align-items: center; gap: 6px;
-      font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
-      opacity: 0; transition: opacity 0.4s;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 0.4s;
     }
-    .live-badge.show { opacity: 1; }
+    .live-pill.show { opacity: 1; }
     .live-dot {
-      width: 7px; height: 7px;
-      background: var(--red); border-radius: 50%;
-      animation: pulse 1.4s ease infinite;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--red);
+      animation: blink 1.4s ease infinite;
     }
-    .flip-btn {
-      width: 40px; height: 40px; border-radius: 50%;
+ 
+    /* ── RESULT PANEL ── */
+    .result-panel {
+      position: fixed;
+      bottom: 140px; left: 16px; right: 16px;
+      z-index: 10;
+      background: rgba(8,8,8,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 16px 18px;
+      transform: translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .result-panel.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+ 
+    .result-label {
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+ 
+    .result-text {
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: var(--text);
+      font-weight: 400;
+    }
+ 
+    .result-close {
+      position: absolute;
+      top: 10px; right: 12px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+    }
+ 
+    /* ── ANALYZING OVERLAY ── */
+    .analyzing {
+      position: fixed;
+      inset: 0;
+      z-index: 9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .analyzing.show { opacity: 1; pointer-events: all; }
+ 
+    .analyzing-inner {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 16px;
+    }
+ 
+    .spinner {
+      width: 48px; height: 48px;
+      border: 2px solid var(--glass-border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+ 
+    .analyzing-label {
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+ 
+    /* ── BOTTOM CONTROLS ── */
+    .bottombar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      padding: 20px 40px max(env(safe-area-inset-bottom), 28px);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%);
+    }
+ 
+    /* Flip btn */
+    .icon-btn {
+      width: 46px; height: 46px;
+      border-radius: 50%;
       border: 1px solid var(--glass-border);
       background: var(--glass);
-      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer; color: #fff;
-      transition: transform 0.3s ease, background 0.2s;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
     }
-    .flip-btn:active { transform: rotate(180deg); background: rgba(255,255,255,0.25); }
-    .bottom-bar {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      padding: 24px 40px calc(env(safe-area-inset-bottom, 16px) + 24px);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 10;
-      background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
-    }
+    .icon-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.15); }
+    .icon-btn.hidden-btn { opacity: 0; pointer-events: none; }
+ 
+    /* Shutter */
     .shutter {
-      width: 76px; height: 76px; border-radius: 50%;
-      border: 3px solid rgba(255,255,255,0.8);
-      background: transparent; cursor: pointer;
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.7);
+      background: transparent;
+      cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: transform 0.15s ease;
+      position: relative;
     }
-    .shutter:active { transform: scale(0.93); }
-    .shutter-inner {
-      width: 56px; height: 56px; border-radius: 50%;
+    .shutter:active { transform: scale(0.92); }
+ 
+    .shutter-fill {
+      width: 60px; height: 60px;
+      border-radius: 50%;
       background: #fff;
-      transition: background 0.2s, border-radius 0.2s, width 0.2s, height 0.2s;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .shutter.stop .shutter-inner {
-      background: var(--red); border-radius: 10px;
-      width: 28px; height: 28px;
+ 
+    /* When camera is off — shutter is start button */
+    .shutter.off { border-color: var(--accent); }
+    .shutter.off .shutter-fill { background: var(--accent); width: 44px; height: 44px; border-radius: 12px; }
+ 
+    /* When analyzing — shutter disabled */
+    .shutter:disabled { opacity: 0.4; cursor: not-allowed; }
+ 
+    /* Retake btn */
+    .retake-btn {
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 10px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass);
+      color: var(--text);
+      cursor: pointer;
+      display: none;
+      backdrop-filter: blur(10px);
     }
+    .retake-btn.show { display: block; }
+ 
+    /* ── TOAST ── */
     .toast {
-      position: fixed; bottom: 130px; left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: rgba(255,59,48,0.9); backdrop-filter: blur(10px);
-      padding: 10px 20px; border-radius: 20px;
-      font-size: 0.78rem; white-space: nowrap;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.3s, transform 0.3s; z-index: 20;
+      position: fixed;
+      bottom: 160px; left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: rgba(255,59,48,0.9);
+      backdrop-filter: blur(10px);
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s;
+      z-index: 20;
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
+ 
+    /* ── CORNER BRACKETS on live view ── */
+    .bracket {
+      position: fixed;
+      width: 28px; height: 28px;
+      z-index: 5;
+      opacity: 0;
+      transition: opacity 0.5s;
     }
+    .bracket.show { opacity: 1; }
+    .bracket.tl { top: 70px; left: 16px; border-top: 1.5px solid var(--accent); border-left: 1.5px solid var(--accent); }
+    .bracket.tr { top: 70px; right: 16px; border-top: 1.5px solid var(--accent); border-right: 1.5px solid var(--accent); }
+    .bracket.bl { bottom: 140px; left: 16px; border-bottom: 1.5px solid var(--accent); border-left: 1.5px solid var(--accent); }
+    .bracket.br { bottom: 140px; right: 16px; border-bottom: 1.5px solid var(--accent); border-right: 1.5px solid var(--accent); }
+ 
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
+ 
   <video id="video" autoplay playsinline muted></video>
-
-  <div id="overlay">
-    <svg width="72" height="72" fill="none" stroke="white" stroke-width="1.2" viewBox="0 0 24 24">
+  <img id="snapshot" alt="snapshot"/>
+  <canvas id="canvas" style="display:none"></canvas>
+ 
+  <!-- Off screen -->
+  <div id="offScreen">
+    <svg class="off-icon" width="64" height="64" fill="none" stroke="white" stroke-width="1.2" viewBox="0 0 24 24">
       <path d="M15 10l4.553-2.277A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
     </svg>
-    <p>Tap the button to start</p>
+    <p class="off-label">Tap to start</p>
   </div>
-
-  <div class="top-bar">
-    <div class="live-badge" id="liveBadge">
+ 
+  <!-- Corner brackets -->
+  <div class="bracket tl" id="bTL"></div>
+  <div class="bracket tr" id="bTR"></div>
+  <div class="bracket bl" id="bBL"></div>
+  <div class="bracket br" id="bBR"></div>
+ 
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="app-name">Vision</div>
+    <div class="live-pill" id="livePill">
       <div class="live-dot"></div>
       Live
     </div>
-    <button class="flip-btn" onclick="flipCamera()">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+  </div>
+ 
+  <!-- Analyzing overlay -->
+  <div class="analyzing" id="analyzingOverlay">
+    <div class="analyzing-inner">
+      <div class="spinner"></div>
+      <div class="analyzing-label">Analyzing...</div>
+    </div>
+  </div>
+ 
+  <!-- Result panel -->
+  <div class="result-panel" id="resultPanel">
+    <button class="result-close" onclick="closeResult()">×</button>
+    <div class="result-label">AI sees</div>
+    <div class="result-text" id="resultText"></div>
+  </div>
+ 
+  <!-- Bottom bar -->
+  <div class="bottombar">
+    <button class="retake-btn" id="retakeBtn" onclick="retake()">Retake</button>
+    <button class="shutter off" id="shutterBtn" onclick="handleShutter()">
+      <div class="shutter-fill"></div>
+    </button>
+    <button class="icon-btn" id="flipBtn" onclick="flipCamera()">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
         <path d="M4 4v5h5M20 20v-5h-5"/>
         <path d="M4 9a8 8 0 0114.93-2.69M20 15A8 8 0 015.07 17.69"/>
       </svg>
     </button>
   </div>
-
-  <div class="bottom-bar">
-    <button class="shutter" id="shutterBtn" onclick="toggleCamera()">
-      <div class="shutter-inner"></div>
-    </button>
-  </div>
-
+ 
   <div class="toast" id="toast"></div>
-
+ 
   <script>
     let stream = null;
     let facingMode = 'environment';
-
+    let state = 'off'; // off | live | frozen
+ 
     const video = document.getElementById('video');
-    const overlay = document.getElementById('overlay');
+    const snapshot = document.getElementById('snapshot');
+    const canvas = document.getElementById('canvas');
+    const offScreen = document.getElementById('offScreen');
     const shutterBtn = document.getElementById('shutterBtn');
-    const liveBadge = document.getElementById('liveBadge');
+    const livePill = document.getElementById('livePill');
+    const flipBtn = document.getElementById('flipBtn');
+    const retakeBtn = document.getElementById('retakeBtn');
+    const resultPanel = document.getElementById('resultPanel');
+    const resultText = document.getElementById('resultText');
+    const analyzingOverlay = document.getElementById('analyzingOverlay');
     const toast = document.getElementById('toast');
-
-    async function toggleCamera() {
-      stream ? stopCamera() : await startCamera();
+    const brackets = document.querySelectorAll('.bracket');
+ 
+    function handleShutter() {
+      if (state === 'off') startCamera();
+      else if (state === 'live') captureAndAnalyze();
     }
-
+ 
     async function startCamera() {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
@@ -155,30 +400,74 @@
           audio: false
         });
         video.srcObject = stream;
-        overlay.classList.add('hidden');
-        shutterBtn.classList.add('stop');
-        liveBadge.classList.add('show');
+        offScreen.classList.add('hidden');
+        livePill.classList.add('show');
+        brackets.forEach(b => b.classList.add('show'));
+        shutterBtn.classList.remove('off');
+        state = 'live';
       } catch (err) {
         showToast('Camera access denied');
       }
     }
-
-    function stopCamera() {
+ 
+    async function captureAndAnalyze() {
+      // Freeze frame
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0);
+      const imageData = canvas.toDataURL('image/jpeg', 0.85);
+ 
+      // Show snapshot
+      snapshot.src = imageData;
+      snapshot.classList.add('visible');
+      video.classList.add('frozen');
+ 
+      // Show analyzing
+      analyzingOverlay.classList.add('show');
+      shutterBtn.disabled = true;
+      retakeBtn.classList.add('show');
+      livePill.classList.remove('show');
+      state = 'frozen';
+ 
+      try {
+        const res = await fetch('/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: imageData })
+        });
+        const data = await res.json();
+        resultText.textContent = data.result;
+        resultPanel.classList.add('show');
+      } catch (err) {
+        showToast('Something went wrong');
+      } finally {
+        analyzingOverlay.classList.remove('show');
+        shutterBtn.disabled = false;
+      }
+    }
+ 
+    function retake() {
+      snapshot.classList.remove('visible');
+      video.classList.remove('frozen');
+      resultPanel.classList.remove('show');
+      retakeBtn.classList.remove('show');
+      livePill.classList.add('show');
+      state = 'live';
+    }
+ 
+    function closeResult() {
+      resultPanel.classList.remove('show');
+    }
+ 
+    async function flipCamera() {
+      facingMode = facingMode === 'environment' ? 'user' : 'environment';
       if (stream) {
         stream.getTracks().forEach(t => t.stop());
         stream = null;
-        video.srcObject = null;
+        await startCamera();
       }
-      overlay.classList.remove('hidden');
-      shutterBtn.classList.remove('stop');
-      liveBadge.classList.remove('show');
     }
-
-    async function flipCamera() {
-      facingMode = facingMode === 'environment' ? 'user' : 'environment';
-      if (stream) { stopCamera(); await startCamera(); }
-    }
-
+ 
     function showToast(msg) {
       toast.textContent = msg;
       toast.classList.add('show');
