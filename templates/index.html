@@ -12,9 +12,9 @@
       --bg: #080808;
       --accent: #c8ff00;
       --text: #f5f5f5;
-      --muted: #666;
-      --glass: rgba(255,255,255,0.07);
-      --glass-border: rgba(255,255,255,0.12);
+      --muted: #555;
+      --glass: rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.1);
       --red: #ff3b30;
       --green: #4caf50;
     }
@@ -27,6 +27,7 @@
       color: var(--text);
     }
 
+    /* ── VIDEO / SNAPSHOT ── */
     #video {
       position: fixed; inset: 0;
       width: 100%; height: 100%;
@@ -35,55 +36,211 @@
       transform: scaleX(-1);
     }
     #video.frozen { display: none; }
-
     #snapshot {
       position: fixed; inset: 0;
       width: 100%; height: 100%;
       object-fit: cover;
-      z-index: 0;
-      display: none;
+      z-index: 0; display: none;
     }
     #snapshot.visible { display: block; }
 
+    /* ── OFF SCREEN — redesigned hero ── */
     #offScreen {
       position: fixed; inset: 0;
       background: var(--bg);
       z-index: 5;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      gap: 16px;
-      transition: opacity 0.4s;
+      transition: opacity 0.5s;
+      overflow: hidden;
     }
     #offScreen.hidden { opacity: 0; pointer-events: none; }
-    .off-icon { opacity: 0.15; }
-    .off-label {
-      font-family: 'Syne Mono', monospace;
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      color: var(--muted);
-      text-transform: uppercase;
+
+    /* Animated radial glow behind hero */
+    .hero-glow {
+      position: absolute;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(200,255,0,0.12) 0%, transparent 65%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -60%);
+      animation: glow-pulse 3.5s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes glow-pulse {
+      0%, 100% { opacity: 0.6; transform: translate(-50%, -60%) scale(1); }
+      50% { opacity: 1; transform: translate(-50%, -60%) scale(1.15); }
     }
 
+    /* Orbiting ring */
+    .hero-ring {
+      position: absolute;
+      width: 260px; height: 260px;
+      border-radius: 50%;
+      border: 1px solid rgba(200,255,0,0.15);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -62%) rotate(0deg);
+      animation: ring-spin 18s linear infinite;
+    }
+    .hero-ring-2 {
+      position: absolute;
+      width: 340px; height: 340px;
+      border-radius: 50%;
+      border: 1px dashed rgba(200,255,0,0.07);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -62%) rotate(0deg);
+      animation: ring-spin 32s linear infinite reverse;
+    }
+    @keyframes ring-spin { to { transform: translate(-50%, -62%) rotate(360deg); } }
+
+    /* Dot on ring */
+    .hero-ring::before {
+      content: '';
+      position: absolute;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      top: -4px; left: 50%; margin-left: -4px;
+      box-shadow: 0 0 12px 4px rgba(200,255,0,0.6);
+    }
+
+    /* Central camera icon */
+    .hero-icon-wrap {
+      position: relative; z-index: 2;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 0;
+      margin-bottom: 20px;
+    }
+
+    .hero-camera-bg {
+      width: 100px; height: 100px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(200,255,0,0.15) 0%, rgba(200,255,0,0.05) 100%);
+      border: 1px solid rgba(200,255,0,0.3);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      box-shadow: 0 0 40px rgba(200,255,0,0.15), inset 0 1px 0 rgba(200,255,0,0.2);
+      animation: icon-float 4s ease-in-out infinite;
+    }
+    @keyframes icon-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .hero-text {
+      position: relative; z-index: 2;
+      text-align: center;
+      padding: 0 40px;
+    }
+    .hero-title {
+      font-size: 3rem; font-weight: 800;
+      letter-spacing: 0.03em;
+      color: var(--text);
+      line-height: 1.05;
+      margin-bottom: 12px;
+    }
+    .hero-title span { color: var(--accent); }
+    .hero-subtitle {
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 36px;
+    }
+
+    /* Tap to start pill button */
+    .hero-cta {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 28px;
+      border-radius: 50px;
+      background: var(--accent);
+      border: none; cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 0.82rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: #000;
+      box-shadow: 0 0 30px rgba(200,255,0,0.35);
+      transition: transform 0.15s, box-shadow 0.2s;
+      animation: cta-pulse 2.5s ease-in-out infinite;
+      position: relative; z-index: 2;
+    }
+    .hero-cta:active { transform: scale(0.95); }
+    @keyframes cta-pulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(200,255,0,0.3); }
+      50% { box-shadow: 0 0 40px rgba(200,255,0,0.55); }
+    }
+
+    /* Floating bin badges */
+    .float-badge {
+      position: absolute;
+      display: flex; align-items: center; gap: 7px;
+      padding: 8px 14px;
+      border-radius: 30px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.58rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      pointer-events: none;
+      z-index: 2;
+      animation: badge-float 5s ease-in-out infinite;
+    }
+    .float-badge.b1 { top: 22%; left: 6%; animation-delay: 0s; color: #81c784; }
+    .float-badge.b2 { top: 28%; right: 5%; animation-delay: 1.2s; color: #4fc3f7; }
+    .float-badge.b3 { bottom: 28%; left: 8%; animation-delay: 0.6s; color: #aaa; }
+    .float-badge .badge-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+    }
+    .float-badge.b1 .badge-dot { background: #81c784; box-shadow: 0 0 6px #81c784; }
+    .float-badge.b2 .badge-dot { background: #4fc3f7; box-shadow: 0 0 6px #4fc3f7; }
+    .float-badge.b3 .badge-dot { background: #aaa; box-shadow: 0 0 6px #aaa; }
+    @keyframes badge-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    /* Grain overlay on off screen */
+    .hero-grain {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+      opacity: 0.6;
+    }
+
+    /* ── TOPBAR ── */
     .topbar {
       position: fixed;
       top: 0; left: 0; right: 0;
-      padding: max(env(safe-area-inset-top), 16px) 20px 14px;
+      padding: max(env(safe-area-inset-top), 16px) 18px 14px;
       z-index: 10;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+      background: linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, transparent 100%);
+    }
+
+    .app-name-wrap {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .app-name-icon {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
     }
     .app-name {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 800;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--accent);
     }
-    .topbar-right {
-      display: flex; align-items: center; gap: 8px;
-    }
+
+    .topbar-right { display: flex; align-items: center; gap: 8px; }
+
     .live-pill {
       display: flex; align-items: center; gap: 6px;
       padding: 5px 12px;
@@ -95,8 +252,7 @@
       font-size: 0.6rem;
       letter-spacing: 0.15em;
       text-transform: uppercase;
-      opacity: 0;
-      transition: opacity 0.4s;
+      opacity: 0; transition: opacity 0.4s;
     }
     .live-pill.show { opacity: 1; }
     .live-dot {
@@ -105,64 +261,37 @@
       background: var(--red);
       animation: blink 1.4s ease infinite;
     }
-    .logout-btn {
-      padding: 5px 12px;
+
+    .topbar-btn {
+      padding: 6px 13px;
       border-radius: 20px;
       background: var(--glass);
       border: 1px solid var(--glass-border);
       backdrop-filter: blur(10px);
       font-family: 'Syne Mono', monospace;
       font-size: 0.6rem;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--muted);
       cursor: pointer;
-      transition: color 0.2s;
+      text-decoration: none;
+      transition: color 0.2s, border-color 0.2s;
     }
-    .logout-btn:hover { color: var(--text); }
+    .topbar-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
 
+    /* ── SHUTTER / BOTTOMBAR ── */
     .bottombar {
       position: fixed;
-      bottom: 60px; left: 0; right: 0;
-      padding: 20px 40px 20px;
+      bottom: 72px; left: 0; right: 0;
+      padding: 20px 40px;
       z-index: 10;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%);
+      background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
       transition: opacity 0.3s;
     }
     .bottombar.hidden { opacity: 0; pointer-events: none; }
-
-    .bottom-nav {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      z-index: 11;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 10px 0 max(env(safe-area-inset-bottom), 12px);
-      background: rgba(8,8,8,0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-top: 1px solid var(--glass-border);
-    }
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      padding: 4px 20px;
-      color: var(--muted);
-      text-decoration: none;
-    }
-    .nav-item.active { color: var(--accent); }
-    .nav-label {
-      font-family: 'Syne Mono', monospace;
-      font-size: 0.52rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
 
     .shutter {
       width: 80px; height: 80px;
@@ -172,6 +301,14 @@
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: transform 0.15s ease;
+      position: relative;
+    }
+    .shutter::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.15);
     }
     .shutter:active { transform: scale(0.92); }
     .shutter-fill {
@@ -180,40 +317,102 @@
       background: #fff;
       transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .shutter.off { border-color: var(--accent); }
+    .shutter.off { border-color: var(--accent); box-shadow: 0 0 20px rgba(200,255,0,0.3); }
     .shutter.off .shutter-fill { background: var(--accent); width: 44px; height: 44px; border-radius: 12px; }
     .shutter:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .analyzing {
-      position: fixed; inset: 0;
-      z-index: 9;
+    /* ── BOTTOM NAV — redesigned ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 11;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 0 max(env(safe-area-inset-bottom), 12px);
+      background: rgba(6,6,6,0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .nav-item {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 4px;
+      padding: 4px 18px;
+      color: var(--muted);
+      text-decoration: none;
+      position: relative;
+      transition: color 0.2s;
+    }
+    .nav-item.active { color: var(--accent); }
+
+    /* Active indicator dot */
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: -10px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    /* Nav icon container with subtle bg on active */
+    .nav-icon-wrap {
+      width: 40px; height: 36px;
+      border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(4px);
-      opacity: 0;
-      pointer-events: none;
+      transition: background 0.2s;
+    }
+    .nav-item.active .nav-icon-wrap {
+      background: rgba(200,255,0,0.1);
+    }
+
+    .nav-label {
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.48rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* ── ANALYZING ── */
+    .analyzing {
+      position: fixed; inset: 0; z-index: 9;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(6px);
+      opacity: 0; pointer-events: none;
       transition: opacity 0.3s;
     }
     .analyzing.show { opacity: 1; pointer-events: all; }
-    .analyzing-inner { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .analyzing-inner {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 28px 40px;
+      backdrop-filter: blur(20px);
+    }
     .spinner {
-      width: 48px; height: 48px;
-      border: 2px solid rgba(255,255,255,0.1);
+      width: 40px; height: 40px;
+      border: 2px solid rgba(200,255,0,0.15);
       border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
     .analyzing-label {
       font-family: 'Syne Mono', monospace;
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
       color: var(--accent);
       text-transform: uppercase;
     }
 
+    /* ── UNCLEAR PANEL ── */
     .unclear-panel {
       position: fixed;
-      bottom: 60px; left: 0; right: 0;
+      bottom: 72px; left: 0; right: 0;
       z-index: 10;
       padding: 36px 24px max(env(safe-area-inset-bottom), 36px);
       background: linear-gradient(to top, rgba(0,0,0,0.97) 60%, transparent 100%);
@@ -226,31 +425,24 @@
     .unclear-title { font-size: 1.1rem; font-weight: 800; color: var(--text); margin-bottom: 8px; }
     .unclear-subtitle {
       font-family: 'Syne Mono', monospace;
-      font-size: 0.72rem;
-      color: var(--muted);
-      letter-spacing: 0.05em;
-      line-height: 1.5;
-      margin-bottom: 24px;
+      font-size: 0.72rem; color: var(--muted);
+      letter-spacing: 0.05em; line-height: 1.5; margin-bottom: 24px;
     }
     .retake-unclear-btn {
-      width: 100%;
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px solid var(--glass-border);
-      background: var(--glass);
-      color: var(--text);
+      width: 100%; padding: 14px;
+      border-radius: 14px; border: 1px solid var(--glass-border);
+      background: var(--glass); color: var(--text);
       font-family: 'Syne Mono', monospace;
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      cursor: pointer;
+      font-size: 0.65rem; letter-spacing: 0.15em;
+      text-transform: uppercase; cursor: pointer;
       backdrop-filter: blur(10px);
     }
     .retake-unclear-btn:active { opacity: 0.7; }
 
+    /* ── GAME PANEL ── */
     .game-panel {
       position: fixed;
-      bottom: 60px; left: 0; right: 0;
+      bottom: 72px; left: 0; right: 0;
       z-index: 10;
       padding: 24px 20px max(env(safe-area-inset-bottom), 32px);
       background: linear-gradient(to top, rgba(0,0,0,0.97) 60%, transparent 100%);
@@ -261,11 +453,8 @@
     .game-question { text-align: center; margin-bottom: 20px; }
     .game-question .which {
       font-family: 'Syne Mono', monospace;
-      font-size: 0.6rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 4px;
+      font-size: 0.6rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
     }
     .game-question .item-name { font-size: 1.1rem; font-weight: 700; color: var(--text); }
 
@@ -294,10 +483,8 @@
     .bin-card[data-bin="Organic"] .bin-icon { background: rgba(129,199,132,0.15); color: #81c784; }
     .bin-label {
       font-family: 'Syne Mono', monospace;
-      font-size: 0.58rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text);
+      font-size: 0.58rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text);
     }
     .bin-card.correct { border-color: var(--green); background: rgba(76,175,80,0.18); }
     .bin-card.wrong-pick { border-color: var(--red); background: rgba(255,59,48,0.15); }
@@ -327,6 +514,7 @@
     }
     .try-again-btn:active { opacity: 0.7; }
 
+    /* ── TOAST ── */
     .toast {
       position: fixed;
       bottom: 180px; left: 50%;
@@ -351,25 +539,64 @@
   <img id="snapshot" alt="snapshot"/>
   <canvas id="canvas" style="display:none"></canvas>
 
+  <!-- ── OFF SCREEN HERO ── -->
   <div id="offScreen">
-    <svg class="off-icon" width="64" height="64" fill="none" stroke="white" stroke-width="1.2" viewBox="0 0 24 24">
-      <path d="M15 10l4.553-2.277A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
-    </svg>
-    <p class="off-label">Tap to start</p>
+    <div class="hero-grain"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-ring"></div>
+    <div class="hero-ring-2"></div>
+
+    <!-- Floating bin badges -->
+    <div class="float-badge b1">
+      <div class="badge-dot"></div>
+      Organic
+    </div>
+    <div class="float-badge b2">
+      <div class="badge-dot"></div>
+      Recycling
+    </div>
+    <div class="float-badge b3">
+      <div class="badge-dot"></div>
+      Garbage
+    </div>
+
+    <div class="hero-icon-wrap">
+      <div class="hero-camera-bg">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#c8ff00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="hero-text">
+      <div class="hero-title">Sort smarter<br/>with <span>AI</span></div>
+      <div class="hero-subtitle">Point. Shoot. Know where it goes.</div>
+    </div>
   </div>
 
+  <!-- ── TOPBAR ── -->
   <div class="topbar">
-    <div class="app-name">Bin Buddy</div>
+    <div class="app-name-wrap">
+      <div class="app-name-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4v5h5"/><path d="M20 20v-5h-5"/>
+          <path d="M4 9a9 9 0 0114.93-2.69M20 15A9 9 0 015.07 17.69"/>
+        </svg>
+      </div>
+      <div class="app-name">Bin Buddy</div>
+    </div>
     <div class="topbar-right">
       <div class="live-pill" id="livePill">
         <div class="live-dot"></div>
         Live
       </div>
-      <a href="/tutorial" style="padding:5px 12px;border-radius:20px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.07);backdrop-filter:blur(10px);font-family:'Syne Mono',monospace;font-size:0.7rem;color:#f0f0f0;text-decoration:none;">?</a>
-      <button class="logout-btn" onclick="logout()">Logout</button>
+      <a href="/tutorial" class="topbar-btn">?</a>
+      <button class="topbar-btn" onclick="logout()">Logout</button>
     </div>
   </div>
 
+  <!-- ── ANALYZING OVERLAY ── -->
   <div class="analyzing" id="analyzingOverlay">
     <div class="analyzing-inner">
       <div class="spinner"></div>
@@ -377,12 +604,14 @@
     </div>
   </div>
 
+  <!-- ── SHUTTER ── -->
   <div class="bottombar" id="bottomBar">
     <button class="shutter off" id="shutterBtn" onclick="handleShutter()">
       <div class="shutter-fill"></div>
     </button>
   </div>
 
+  <!-- ── GAME PANEL ── -->
   <div class="game-panel" id="gamePanel">
     <div class="game-question">
       <div class="which">Which bin for</div>
@@ -404,8 +633,7 @@
       <button class="bin-card" data-bin="Recycling" onclick="chooseBin('Recycling')">
         <div class="bin-icon">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 4v5h5"/>
-            <path d="M20 20v-5h-5"/>
+            <path d="M4 4v5h5"/><path d="M20 20v-5h-5"/>
             <path d="M4 9a9 9 0 0114.93-2.69M20 15A9 9 0 015.07 17.69"/>
           </svg>
         </div>
@@ -429,6 +657,7 @@
     </div>
   </div>
 
+  <!-- ── UNCLEAR PANEL ── -->
   <div class="unclear-panel" id="unclearPanel">
     <div class="unclear-icon">🔍</div>
     <div class="unclear-title">Can't identify this</div>
@@ -436,37 +665,46 @@
     <button class="retake-unclear-btn" onclick="retake()">Try a clearer photo</button>
   </div>
 
+  <!-- ── BOTTOM NAV ── -->
   <nav class="bottom-nav">
     <a href="/learning" class="nav-item" style="text-decoration:none;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-      </svg>
+      <div class="nav-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+      </div>
       <span class="nav-label">Learning</span>
     </a>
     <div class="nav-item active">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-        <circle cx="12" cy="13" r="4"/>
-      </svg>
+      <div class="nav-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+      </div>
       <span class="nav-label">Camera</span>
     </div>
     <div class="nav-item">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 20h9"/>
-        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-      </svg>
+      <div class="nav-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+      </div>
       <span class="nav-label">Practice</span>
     </div>
     <div class="nav-item">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
-        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
-        <path d="M4 22h16"/>
-        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-        <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>
-      </svg>
+      <div class="nav-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+          <path d="M4 22h16"/>
+          <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+          <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+          <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>
+        </svg>
+      </div>
       <span class="nav-label">Game</span>
     </div>
   </nav>
@@ -474,7 +712,6 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    // ── AUTH CHECK — redirect to login if no token ──
     const authToken = localStorage.getItem('bb_token');
     if (!authToken) window.location.replace('/login');
 
@@ -551,24 +788,16 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + authToken   // ← sends JWT token
+            'Authorization': 'Bearer ' + authToken
           },
           body: JSON.stringify({ image: imageData })
         });
 
-        // Token expired or invalid — send back to login
-        if (res.status === 401) {
-          logout();
-          return;
-        }
+        if (res.status === 401) { logout(); return; }
 
         const data = await res.json();
 
-        if (data.error) {
-          showToast(data.error);
-          retake();
-          return;
-        }
+        if (data.error) { showToast(data.error); retake(); return; }
 
         analyzingOverlay.classList.remove('show');
 
