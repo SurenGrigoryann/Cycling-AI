@@ -3,7 +3,7 @@ import os
 import anthropic
 
 app = Flask(__name__)
-client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+client = anthropic.Anthropic(api_key=os.environ.get("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"))
 
 @app.route('/')
 def index():
