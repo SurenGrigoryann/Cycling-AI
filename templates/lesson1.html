@@ -3,12 +3,12 @@
 <head>
  <meta charset="UTF-8"/>
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
- <title>Lesson 2 — Plastics & Bottles</title>
+ <title>Lesson 1 — Food & Organics</title>
  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Syne+Mono&display=swap" rel="stylesheet"/>
  <style>
  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
  :root {
- --bg: #080808; --accent: #4fc3f7; --text: #f5f5f5;
+ --bg: #080808; --accent: #c8ff00; --text: #f5f5f5;
  --muted: #555; --glass: rgba(255,255,255,0.05);
  --glass-border: rgba(255,255,255,0.1); --green: #4caf50; --red: #ff3b30;
  }
@@ -23,31 +23,35 @@
  .slide { width: 100%; height: 100%; overflow-y: auto; scrollbar-width: none; padding: 24px 20px 20px; display: none; flex-direction: column; gap: 16px; }
  .slide.active { display: flex; }
  .slide::-webkit-scrollbar { display: none; }
+
+ /* HERO */
  .slide-hero { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
  .slide-tag { font-family: 'Syne Mono', monospace; font-size: 0.48rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); opacity: 0.8; }
  .slide-title { font-size: 1.6rem; font-weight: 800; line-height: 1.15; }
  .slide-emoji { font-size: 3.2rem; margin-bottom: 2px; }
  .slide-body { font-size: 0.9rem; line-height: 1.7; color: rgba(245,245,245,0.75); }
+
+ /* CARDS */
  .info-card { border-radius: 16px; padding: 18px 20px; font-size: 0.85rem; line-height: 1.6; }
- .info-card.blue { background: rgba(79,195,247,0.06); border: 1px solid rgba(79,195,247,0.18); border-left: 3px solid var(--accent); }
+ .info-card.green { background: rgba(200,255,0,0.06); border: 1px solid rgba(200,255,0,0.18); border-left: 3px solid var(--accent); }
  .info-card.red { background: rgba(255,59,48,0.06); border: 1px solid rgba(255,59,48,0.18); border-left: 3px solid #ff3b30; }
  .info-card.neutral { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid rgba(255,255,255,0.3); }
  .card-title { font-size: 0.65rem; font-family: 'Syne Mono', monospace; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; opacity: 0.6; }
  .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
- .tag { background: rgba(79,195,247,0.1); border: 1px solid rgba(79,195,247,0.2); border-radius: 20px; padding: 5px 12px; font-size: 0.75rem; font-weight: 600; color: var(--accent); }
+ .tag { background: rgba(200,255,0,0.1); border: 1px solid rgba(200,255,0,0.2); border-radius: 20px; padding: 5px 12px; font-size: 0.75rem; font-weight: 600; color: var(--accent); }
  .tag.bad { background: rgba(255,59,48,0.1); border-color: rgba(255,59,48,0.25); color: #ff6b6b; }
- .stat-banner { background: rgba(79,195,247,0.07); border: 1px solid rgba(79,195,247,0.15); border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 16px; }
+
+ /* STAT BANNER */
+ .stat-banner { background: rgba(200,255,0,0.07); border: 1px solid rgba(200,255,0,0.15); border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 16px; }
  .stat-number { font-size: 2.4rem; font-weight: 800; color: var(--accent); line-height: 1; flex-shrink: 0; }
  .stat-text { font-size: 0.82rem; line-height: 1.5; color: rgba(245,245,245,0.7); }
- .steps { display: flex; flex-direction: column; gap: 10px; }
- .step { display: flex; align-items: flex-start; gap: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 16px; }
- .step-num { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #080808; font-weight: 800; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
- .step-text { font-size: 0.85rem; line-height: 1.5; color: rgba(245,245,245,0.8); }
+
+ /* QUESTION */
  .q-header { display: flex; flex-direction: column; gap: 6px; }
  .question-label { font-family: 'Syne Mono', monospace; font-size: 0.46rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
  .question-type { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; display: inline-block; width: fit-content; }
  .question-type.tf { background: rgba(79,195,247,0.15); color: #4fc3f7; }
- .question-type.mc { background: rgba(79,195,247,0.12); color: var(--accent); }
+ .question-type.mc { background: rgba(200,255,0,0.12); color: var(--accent); }
  .question-type.action { background: rgba(255,213,79,0.15); color: #ffd54f; }
  .question-text { font-size: 1.15rem; font-weight: 700; line-height: 1.35; }
  .choices { display: flex; flex-direction: column; gap: 10px; }
@@ -68,12 +72,16 @@
  .feedback-panel.correct { background: rgba(76,175,80,0.1); border: 1px solid rgba(76,175,80,0.3); color: #a5d6a7; display: flex; gap: 10px; align-items: flex-start; }
  .feedback-panel.wrong { background: rgba(255,59,48,0.08); border: 1px solid rgba(255,59,48,0.25); color: #ef9a9a; display: flex; gap: 10px; align-items: flex-start; }
  .fb-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+ /* BOTTOM */
  .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 14px 20px max(env(safe-area-inset-bottom),16px); background: rgba(8,8,8,0.95); backdrop-filter: blur(12px); border-top: 1px solid var(--glass-border); }
  .continue-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--accent); color: #080808; font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800; letter-spacing: 0.05em; cursor: pointer; transition: opacity 0.2s, transform 0.1s; }
  .continue-btn:disabled { opacity: 0.2; cursor: default; }
  .continue-btn:not(:disabled):active { transform: scale(0.98); }
+
+ /* COMPLETION */
  .completion-slide { align-items: center; justify-content: center; text-align: center; gap: 20px; padding: 40px 24px; }
- .completion-badge { width: 100px; height: 100px; border-radius: 28px; background: rgba(79,195,247,0.12); border: 2px solid rgba(79,195,247,0.3); display: flex; align-items: center; justify-content: center; font-size: 3.2rem; margin: 0 auto; }
+ .completion-badge { width: 100px; height: 100px; border-radius: 28px; background: rgba(200,255,0,0.12); border: 2px solid rgba(200,255,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 3.2rem; margin: 0 auto; }
  .completion-title { font-size: 1.9rem; font-weight: 800; }
  .completion-sub { font-size: 0.88rem; color: rgba(245,245,245,0.5); line-height: 1.6; }
  .home-btn { padding: 15px 40px; border-radius: 14px; border: none; background: var(--accent); color: #080808; font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800; cursor: pointer; margin-top: 4px; }
@@ -91,100 +99,100 @@
  <div class="slides-wrap">
  <div class="slides-track" id="track">
 
- <!-- SLIDE 0: Theory — What plastics can be recycled -->
+ <!-- SLIDE 0: Theory — What is organic -->
  <div class="slide">
  <div class="slide-hero">
- <div class="slide-tag">Lesson 2 · Plastics & Bottles</div>
- <div class="slide-emoji">♻️</div>
- <div class="slide-title">What Plastics Can Be Recycled?</div>
+ <div class="slide-tag">Lesson 1 · Food & Organics</div>
+ <div class="slide-emoji">🌱</div>
+ <div class="slide-title">What Goes in the Organic Bin?</div>
  </div>
- <div class="slide-body">Most bottles, jugs, and rigid containers can go in the recycling bin — but they must be empty and rinsed first.</div>
- <div class="info-card blue">
- <div class="card-title">✅ Recyclable</div>
+ <div class="slide-body">The organic bin is for food and natural materials that break down in the ground. When composted, they turn into rich soil — not pollution!</div>
+ <div class="info-card green">
+ <div class="card-title">✅ Goes in Organic</div>
  <div class="tag-list">
- <span class="tag">💧 Water bottles</span>
- <span class="tag">🥛 Milk jugs</span>
- <span class="tag">🧴 Shampoo bottles</span>
- <span class="tag">🫙 Yogurt containers</span>
- <span class="tag">🧹 Detergent bottles</span>
+ <span class="tag">🍌 Fruit peels</span>
+ <span class="tag">🥦 Veggie scraps</span>
+ <span class="tag">☕ Coffee grounds</span>
+ <span class="tag">🥚 Eggshells</span>
+ <span class="tag">🍞 Bread</span>
+ <span class="tag">🍵 Tea bags</span>
  </div>
  </div>
  </div>
 
- <!-- SLIDE 1: Q1 — MC -->
+ <!-- SLIDE 1: Q1 — True/False -->
  <div class="slide">
  <div class="q-header">
  <div class="question-label">Question 1 of 5</div>
- <span class="question-type mc">Pick the right bin</span>
+ <span class="question-type tf">True / False</span>
  </div>
- <div class="question-text">An empty, rinsed plastic water bottle goes where?</div>
- <div class="choices">
- <button class="choice-btn" onclick="answer(this, false, '❌ Water bottles are not food waste — they\'re recyclable materials, not organic.')">
- <span class="choice-icon">🟢</span> Organic bin
+ <div class="question-text">Eggshells can go in the organic bin.</div>
+ <div class="tf-choices">
+ <button class="tf-btn" onclick="answerTF(this, true, '✅ True! Eggshells are a natural material that breaks down easily in compost. They\'re great for soil!')">
+ <span class="tf-icon">✅</span> True
  </button>
- <button class="choice-btn" onclick="answer(this, true, '✅ Correct! Empty, rinsed plastic bottles are one of the most common recyclable items.')">
- <span class="choice-icon">🔵</span> Recycling bin
- </button>
- <button class="choice-btn" onclick="answer(this, false, '❌ Don\'t trash it! Clean plastic bottles can be turned into new materials — they go in recycling.')">
- <span class="choice-icon">🗑️</span> Garbage bin
+ <button class="tf-btn" onclick="answerTF(this, false, '❌ Actually true! Eggshells belong in the organic bin — they break down and add calcium to compost.')">
+ <span class="tf-icon">❌</span> False
  </button>
  </div>
  <div class="feedback-panel" id="fb1"></div>
  </div>
 
- <!-- SLIDE 2: Theory — Why rinsing matters -->
+ <!-- SLIDE 2: Theory — What does NOT go in organic -->
  <div class="slide">
  <div class="slide-hero">
- <div class="slide-tag">Lesson 2 · Plastics & Bottles</div>
- <div class="slide-emoji">🚿</div>
- <div class="slide-title">Why You Must Rinse First</div>
+ <div class="slide-tag">Lesson 1 · Food & Organics</div>
+ <div class="slide-emoji">🚫</div>
+ <div class="slide-title">What Does NOT Belong</div>
  </div>
- <div class="slide-body">Food residue in containers can contaminate an entire truckload of recycling — sending it all to landfill instead.</div>
- <div class="steps">
- <div class="step"><div class="step-num">1</div><div class="step-text">Empty out all liquid or food residue</div></div>
- <div class="step"><div class="step-num">2</div><div class="step-text">Give it a quick rinse — you don't need to scrub spotless</div></div>
- <div class="step"><div class="step-num">3</div><div class="step-text">Then it's safe to put in the recycling bin</div></div>
+ <div class="slide-body">Not everything from food belongs in organic. Some items attract pests, don't break down properly, or smell terrible.</div>
+ <div class="info-card red">
+ <div class="card-title">❌ Keep Out of Organic</div>
+ <div class="tag-list">
+ <span class="tag bad">🍖 Meat & fish</span>
+ <span class="tag bad">🧀 Dairy</span>
+ <span class="tag bad">🍟 Oily food</span>
+ <span class="tag bad">🐾 Pet waste</span>
+ </div>
+ </div>
+ <div class="info-card neutral">
+ <div class="card-title">Why?</div>
+ Meat and dairy attract rats and flies. Oily food coats organic material and stops it from composting properly.
  </div>
  </div>
 
- <!-- SLIDE 3: Q2 — What should you do -->
+ <!-- SLIDE 3: Q2 — Multiple choice -->
  <div class="slide">
  <div class="q-header">
  <div class="question-label">Question 2 of 5</div>
- <span class="question-type action">What should you do?</span>
+ <span class="question-type mc">Pick the right bin</span>
  </div>
- <div class="question-text">A plastic container still has pasta sauce inside. What do you do?</div>
+ <div class="question-text">You have leftover chicken bones. Where do they go?</div>
  <div class="choices">
- <button class="choice-btn" onclick="answer(this, false, '❌ Food-contaminated containers ruin recycling batches. Always rinse it first, then recycle.')">
- <span class="choice-icon">🔵</span> Throw it in recycling as-is
+ <button class="choice-btn" onclick="answer(this, false, '❌ Meat and bones attract pests and don\'t compost well. They must go in the Garbage bin.')">
+ <span class="choice-icon">🟢</span> Organic bin
  </button>
- <button class="choice-btn" onclick="answer(this, true, '✅ Correct! A quick rinse removes contamination and makes it safe to recycle.')">
- <span class="choice-icon">🚿</span> Rinse it, then recycle
+ <button class="choice-btn" onclick="answer(this, false, '❌ Bones are not a recyclable material at all. They belong in the Garbage bin.')">
+ <span class="choice-icon">🔵</span> Recycling bin
  </button>
- <button class="choice-btn" onclick="answer(this, false, '❌ Don\'t give up on it — just rinse the container and it becomes perfectly recyclable.')">
- <span class="choice-icon">🗑️</span> Throw it in garbage
+ <button class="choice-btn" onclick="answer(this, true, '✅ Correct! Meat, fish, and bones attract animals and don\'t compost well — Garbage is the right choice.')">
+ <span class="choice-icon">🗑️</span> Garbage bin
  </button>
  </div>
  <div class="feedback-panel" id="fb3"></div>
  </div>
 
- <!-- SLIDE 4: Theory — Plastics that can't be recycled -->
+ <!-- SLIDE 4: Theory — Why sorting matters -->
  <div class="slide">
  <div class="slide-hero">
- <div class="slide-tag">Lesson 2 · Plastics & Bottles</div>
- <div class="slide-emoji">🚫</div>
- <div class="slide-title">Plastics That Can NOT Be Recycled</div>
+ <div class="slide-tag">Lesson 1 · Food & Organics</div>
+ <div class="slide-emoji">🌍</div>
+ <div class="slide-title">Why It Actually Matters</div>
  </div>
- <div class="slide-body">Soft and flexible plastics cause jams in recycling machines. Most curbside programs don't accept them.</div>
- <div class="info-card red">
- <div class="card-title">❌ Goes in Garbage</div>
- <div class="tag-list">
- <span class="tag bad">🛍️ Plastic bags</span>
- <span class="tag bad">🧊 Styrofoam</span>
- <span class="tag bad">🥤 Plastic straws</span>
- <span class="tag bad">🍟 Chip bags</span>
- <span class="tag bad">🍴 Plastic cutlery</span>
- </div>
+ <div class="slide-body">When food waste goes to landfill, it releases methane — a gas that's 25 times more harmful than CO₂. But composted food becomes rich soil!</div>
+ <div class="stat-banner">
+ <div class="stat-number">30%</div>
+ <div class="stat-text">of all household garbage is food waste. Sorting it correctly is one of the biggest things you can do for the environment.</div>
  </div>
  </div>
 
@@ -194,86 +202,86 @@
  <div class="question-label">Question 3 of 5</div>
  <span class="question-type tf">True / False</span>
  </div>
- <div class="question-text">Styrofoam cups can be recycled in a regular recycling bin.</div>
+ <div class="question-text">Food in landfill releases a gas more harmful than CO₂.</div>
  <div class="tf-choices">
- <button class="tf-btn" onclick="answerTF(this, false, '❌ False! Styrofoam is NOT accepted in most recycling programs. It goes in the Garbage bin.')">
+ <button class="tf-btn" onclick="answerTF(this, true, '✅ True! Food waste in landfill produces methane — 25x more harmful than CO₂. Composting stops this.')">
  <span class="tf-icon">✅</span> True
  </button>
- <button class="tf-btn" onclick="answerTF(this, true, '✅ Correct! Styrofoam cannot be recycled in regular bins — it goes straight to Garbage.')">
+ <button class="tf-btn" onclick="answerTF(this, false, '❌ Actually true! Decomposing food in landfills releases methane, which is far worse for climate than CO₂.')">
  <span class="tf-icon">❌</span> False
  </button>
  </div>
  <div class="feedback-panel" id="fb5"></div>
  </div>
 
- <!-- SLIDE 6: Theory — Caps and lids -->
+ <!-- SLIDE 6: Theory — Surprising items -->
  <div class="slide">
  <div class="slide-hero">
- <div class="slide-tag">Lesson 2 · Plastics & Bottles</div>
- <div class="slide-emoji">🔩</div>
- <div class="slide-title">What About Caps and Lids?</div>
+ <div class="slide-tag">Lesson 1 · Food & Organics</div>
+ <div class="slide-emoji">☕</div>
+ <div class="slide-title">Surprising Organic Items</div>
  </div>
- <div class="slide-body">A lot of people remove caps before recycling. But that's actually wrong — here's the correct rule:</div>
- <div class="info-card blue">
- <div class="card-title">💡 The cap rule</div>
- <strong>Leave caps ON the bottle</strong> when recycling. Loose caps are too small — they fall through sorting machinery and end up in landfill anyway.
- </div>
- <div class="info-card neutral">
- Paper labels are fine to leave on too — the recycling process handles them automatically.
+ <div class="slide-body">Some things look like garbage, but are actually perfect for the organic bin!</div>
+ <div class="info-card green">
+ <div class="card-title">💡 You didn't know these go in organic</div>
+ Coffee grounds and paper filters · Paper towels used on food · Hair and nail clippings · Bread and pasta · Potting soil · Cardboard egg cartons
  </div>
  </div>
 
- <!-- SLIDE 7: Q4 — True/False -->
+ <!-- SLIDE 7: Q4 — What should you do -->
  <div class="slide">
  <div class="q-header">
  <div class="question-label">Question 4 of 5</div>
- <span class="question-type tf">True / False</span>
+ <span class="question-type action">What should you do?</span>
  </div>
- <div class="question-text">You should remove the cap from a bottle before putting it in recycling.</div>
- <div class="tf-choices">
- <button class="tf-btn" onclick="answerTF(this, false, '❌ False! Leave caps ON the bottle. Loose caps are too small for sorting machines and get lost.')">
- <span class="tf-icon">✅</span> True
+ <div class="question-text">You have used coffee grounds and the paper filter. What do you do with them?</div>
+ <div class="choices">
+ <button class="choice-btn" onclick="answer(this, true, '✅ Correct! Coffee grounds and paper filters are great compost material. Organic bin is perfect.')">
+ <span class="choice-icon">🟢</span> Toss them in the organic bin
  </button>
- <button class="tf-btn" onclick="answerTF(this, true, '✅ Correct! Keep the cap on — loose caps fall through sorting machinery. Leave them on the bottle.')">
- <span class="tf-icon">❌</span> False
+ <button class="choice-btn" onclick="answer(this, false, '❌ Coffee grounds aren\'t recyclable materials. They\'re organic waste and belong in the organic bin.')">
+ <span class="choice-icon">🔵</span> Put them in recycling
+ </button>
+ <button class="choice-btn" onclick="answer(this, false, '❌ Don\'t waste it! Coffee grounds are amazing compost. They belong in the organic bin.')">
+ <span class="choice-icon">🗑️</span> Throw in garbage
  </button>
  </div>
  <div class="feedback-panel" id="fb7"></div>
  </div>
 
- <!-- SLIDE 8: Theory — Impact -->
+ <!-- SLIDE 8: Theory — Simple rule -->
  <div class="slide">
  <div class="slide-hero">
- <div class="slide-tag">Lesson 2 · Plastics & Bottles</div>
- <div class="slide-emoji">⚡</div>
- <div class="slide-title">Why It Makes a Difference</div>
+ <div class="slide-tag">Lesson 1 · Food & Organics</div>
+ <div class="slide-emoji">📋</div>
+ <div class="slide-title">The Simple Rule</div>
  </div>
- <div class="slide-body">Making new plastic from recycled material uses far less energy than making virgin plastic from oil.</div>
- <div class="stat-banner">
- <div class="stat-number">9%</div>
- <div class="stat-text">of all plastic ever made has been recycled. Globally, most ends up in landfill or the ocean. Your sorting choices actually matter.</div>
+ <div class="slide-body">If it grew from the ground or came from a plant, it usually goes in Organic. If it's meat, dairy, or oily — it goes in Garbage.</div>
+ <div class="info-card green">
+ <div class="card-title">✅ Organic</div>
+ Vegetables · Fruit scraps · Bread & grains · Eggshells · Coffee · Tea
  </div>
- <div class="info-card blue">
- <div class="card-title">💡 Did you know?</div>
- Recycling one plastic bottle saves enough energy to power a light bulb for 6 hours.
+ <div class="info-card red">
+ <div class="card-title">❌ Garbage</div>
+ Meat & fish · Dairy · Oily food · Pet waste
  </div>
  </div>
 
- <!-- SLIDE 9: Q5 — MC -->
+ <!-- SLIDE 9: Q5 — Multiple choice -->
  <div class="slide">
  <div class="q-header">
  <div class="question-label">Question 5 of 5</div>
  <span class="question-type mc">Pick the right bin</span>
  </div>
- <div class="question-text">A plastic grocery bag — where does it go?</div>
+ <div class="question-text">A soggy paper towel used to wipe up spilled juice — where does it go?</div>
  <div class="choices">
- <button class="choice-btn" onclick="answer(this, false, '❌ Plastic bags tangle in sorting machines and jam the equipment. Never put them in curbside recycling.')">
- <span class="choice-icon">🔵</span> Recycling bin
- </button>
- <button class="choice-btn" onclick="answer(this, false, '❌ Plastic bags are not organic matter — they won\'t compost. They belong in Garbage.')">
+ <button class="choice-btn" onclick="answer(this, true, '✅ Correct! Paper towels soiled with food or liquid can be composted. They belong in the organic bin.')">
  <span class="choice-icon">🟢</span> Organic bin
  </button>
- <button class="choice-btn" onclick="answer(this, true, '✅ Correct! Soft plastic bags jam recycling machines. Put in Garbage, or use store drop-off bins for soft plastics.')">
+ <button class="choice-btn" onclick="answer(this, false, '❌ Wet or food-soiled paper towels can\'t be recycled — they contaminate the batch. Organic bin is right.')">
+ <span class="choice-icon">🔵</span> Recycling bin
+ </button>
+ <button class="choice-btn" onclick="answer(this, false, '❌ Food-soiled paper towels are actually compostable! They belong in the organic bin, not garbage.')">
  <span class="choice-icon">🗑️</span> Garbage bin
  </button>
  </div>
@@ -282,9 +290,9 @@
 
  <!-- SLIDE 10: Completion -->
  <div class="slide completion-slide">
- <div class="completion-badge">♻️</div>
+ <div class="completion-badge">🌱</div>
  <div class="completion-title">Lesson Complete!</div>
- <div class="completion-sub">You've mastered Plastics & Bottles.<br/>Lesson 3 is now unlocked!</div>
+ <div class="completion-sub">You've mastered Food & Organics.<br/>Lesson 2 is now unlocked!</div>
  <button class="home-btn" onclick="window.location='/learning'">Back to Learning</button>
  </div>
 
@@ -296,7 +304,6 @@
  </div>
 
  <script>
- if (!localStorage.getItem('lesson_1_complete')) { window.location.replace('/learning'); }
  const TOTAL = 10;
  let current = 0;
  let answered = false;
@@ -341,7 +348,7 @@
 
  function next() {
  if (current === TOTAL - 1) {
- localStorage.setItem('lesson_2_complete', 'true');
+ localStorage.setItem('lesson_1_complete', 'true');
  current = TOTAL; updateUI(); return;
  }
  current++; answered = false; updateUI();
