@@ -650,7 +650,7 @@
       clearMsg();
 
       try {
-        const endpoint = currentTab === 'login' ? '/login' : '/register';
+        const endpoint = currentTab === 'login' ? '/login_submit' : '/register';
         const body = currentTab === 'login'
           ? { username, password }
           : { username, email, password };
@@ -695,7 +695,7 @@
 
     async function autoLogin(username, password) {
       try {
-        const res = await fetch('/login', {
+        const res = await fetch('/login_submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })

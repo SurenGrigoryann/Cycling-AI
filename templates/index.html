@@ -27,7 +27,6 @@
       color: var(--text);
     }
 
-    /* VIDEO */
     #video {
       position: fixed; inset: 0;
       width: 100%; height: 100%;
@@ -46,7 +45,6 @@
     }
     #snapshot.visible { display: block; }
 
-    /* OFF SCREEN */
     #offScreen {
       position: fixed; inset: 0;
       background: var(--bg);
@@ -66,7 +64,6 @@
       text-transform: uppercase;
     }
 
-    /* TOP BAR */
     .topbar {
       position: fixed;
       top: 0; left: 0; right: 0;
@@ -83,6 +80,9 @@
       letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--accent);
+    }
+    .topbar-right {
+      display: flex; align-items: center; gap: 8px;
     }
     .live-pill {
       display: flex; align-items: center; gap: 6px;
@@ -105,8 +105,22 @@
       background: var(--red);
       animation: blink 1.4s ease infinite;
     }
+    .logout-btn {
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .logout-btn:hover { color: var(--text); }
 
-    /* BOTTOM BAR */
     .bottombar {
       position: fixed;
       bottom: 60px; left: 0; right: 0;
@@ -120,7 +134,6 @@
     }
     .bottombar.hidden { opacity: 0; pointer-events: none; }
 
-    /* BOTTOM NAV */
     .bottom-nav {
       position: fixed;
       bottom: 0; left: 0; right: 0;
@@ -141,6 +154,7 @@
       gap: 4px;
       padding: 4px 20px;
       color: var(--muted);
+      text-decoration: none;
     }
     .nav-item.active { color: var(--accent); }
     .nav-label {
@@ -170,7 +184,6 @@
     .shutter.off .shutter-fill { background: var(--accent); width: 44px; height: 44px; border-radius: 12px; }
     .shutter:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* ANALYZING OVERLAY */
     .analyzing {
       position: fixed; inset: 0;
       z-index: 9;
@@ -198,7 +211,6 @@
       text-transform: uppercase;
     }
 
-    /* UNCLEAR PANEL */
     .unclear-panel {
       position: fixed;
       bottom: 60px; left: 0; right: 0;
@@ -210,16 +222,8 @@
       text-align: center;
     }
     .unclear-panel.show { transform: translateY(0); }
-    .unclear-icon {
-      font-size: 2.8rem;
-      margin-bottom: 12px;
-    }
-    .unclear-title {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: var(--text);
-      margin-bottom: 8px;
-    }
+    .unclear-icon { font-size: 2.8rem; margin-bottom: 12px; }
+    .unclear-title { font-size: 1.1rem; font-weight: 800; color: var(--text); margin-bottom: 8px; }
     .unclear-subtitle {
       font-family: 'Syne Mono', monospace;
       font-size: 0.72rem;
@@ -244,7 +248,6 @@
     }
     .retake-unclear-btn:active { opacity: 0.7; }
 
-    /* GAME PANEL */
     .game-panel {
       position: fixed;
       bottom: 60px; left: 0; right: 0;
@@ -255,11 +258,7 @@
       transition: transform 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
     }
     .game-panel.show { transform: translateY(0); }
-
-    .game-question {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+    .game-question { text-align: center; margin-bottom: 20px; }
     .game-question .which {
       font-family: 'Syne Mono', monospace;
       font-size: 0.6rem;
@@ -268,36 +267,23 @@
       color: var(--muted);
       margin-bottom: 4px;
     }
-    .game-question .item-name {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--text);
-    }
+    .game-question .item-name { font-size: 1.1rem; font-weight: 700; color: var(--text); }
 
-    /* BIN CARDS */
-    .bins-row {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-    }
+    .bins-row { display: flex; gap: 10px; justify-content: center; }
     .bin-card {
-      flex: 1;
-      max-width: 115px;
+      flex: 1; max-width: 115px;
       background: var(--glass);
       border: 1.5px solid var(--glass-border);
       border-radius: 20px;
       padding: 18px 8px 14px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 10px;
       cursor: pointer;
       transition: all 0.2s;
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
     .bin-card:active { transform: scale(0.94); }
-
     .bin-icon {
       width: 52px; height: 52px;
       border-radius: 14px;
@@ -306,7 +292,6 @@
     .bin-card[data-bin="Garbage"] .bin-icon { background: rgba(150,150,150,0.15); color: #aaa; }
     .bin-card[data-bin="Recycling"] .bin-icon { background: rgba(79,195,247,0.15); color: #4fc3f7; }
     .bin-card[data-bin="Organic"] .bin-icon { background: rgba(129,199,132,0.15); color: #81c784; }
-
     .bin-label {
       font-family: 'Syne Mono', monospace;
       font-size: 0.58rem;
@@ -314,82 +299,45 @@
       text-transform: uppercase;
       color: var(--text);
     }
-
-    /* Reveal states */
-    .bin-card.correct {
-      border-color: var(--green);
-      background: rgba(76,175,80,0.18);
-    }
-    .bin-card.wrong-pick {
-      border-color: var(--red);
-      background: rgba(255,59,48,0.15);
-    }
-    .bin-card.dimmed {
-      opacity: 0.3;
-    }
+    .bin-card.correct { border-color: var(--green); background: rgba(76,175,80,0.18); }
+    .bin-card.wrong-pick { border-color: var(--red); background: rgba(255,59,48,0.15); }
+    .bin-card.dimmed { opacity: 0.3; }
     .bin-card.disabled { cursor: default; }
 
-    /* Explanation */
     .explain-box {
       margin-top: 18px;
-      opacity: 0;
-      transform: translateY(8px);
+      opacity: 0; transform: translateY(8px);
       transition: all 0.35s 0.15s;
       pointer-events: none;
     }
-    .explain-box.show {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: all;
-    }
-    .verdict {
-      font-size: 1.15rem;
-      font-weight: 800;
-      text-align: center;
-      margin-bottom: 6px;
-    }
+    .explain-box.show { opacity: 1; transform: translateY(0); pointer-events: all; }
+    .verdict { font-size: 1.15rem; font-weight: 800; text-align: center; margin-bottom: 6px; }
     .verdict.correct { color: var(--green); }
     .verdict.wrong { color: var(--red); }
-    .explain-text {
-      font-size: 0.82rem;
-      line-height: 1.55;
-      color: rgba(245,245,245,0.8);
-      text-align: center;
-    }
+    .explain-text { font-size: 0.82rem; line-height: 1.55; color: rgba(245,245,245,0.8); text-align: center; }
     .try-again-btn {
-      margin-top: 16px;
-      width: 100%;
-      padding: 14px;
-      border-radius: 14px;
+      margin-top: 16px; width: 100%;
+      padding: 14px; border-radius: 14px;
       border: 1px solid var(--glass-border);
-      background: var(--glass);
-      color: var(--text);
+      background: var(--glass); color: var(--text);
       font-family: 'Syne Mono', monospace;
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      cursor: pointer;
+      font-size: 0.65rem; letter-spacing: 0.15em;
+      text-transform: uppercase; cursor: pointer;
       backdrop-filter: blur(10px);
     }
     .try-again-btn:active { opacity: 0.7; }
 
-    /* TOAST */
     .toast {
       position: fixed;
       bottom: 180px; left: 50%;
       transform: translateX(-50%) translateY(10px);
       background: rgba(255,59,48,0.9);
       backdrop-filter: blur(10px);
-      padding: 10px 20px;
-      border-radius: 20px;
+      padding: 10px 20px; border-radius: 20px;
       font-family: 'Syne Mono', monospace;
-      font-size: 0.72rem;
-      letter-spacing: 0.1em;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.3s;
-      z-index: 20;
+      font-size: 0.72rem; letter-spacing: 0.1em;
+      white-space: nowrap; opacity: 0;
+      pointer-events: none; transition: all 0.3s; z-index: 20;
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -403,7 +351,6 @@
   <img id="snapshot" alt="snapshot"/>
   <canvas id="canvas" style="display:none"></canvas>
 
-  <!-- Off screen -->
   <div id="offScreen">
     <svg class="off-icon" width="64" height="64" fill="none" stroke="white" stroke-width="1.2" viewBox="0 0 24 24">
       <path d="M15 10l4.553-2.277A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
@@ -411,19 +358,18 @@
     <p class="off-label">Tap to start</p>
   </div>
 
-  <!-- Top bar -->
   <div class="topbar">
     <div class="app-name">Bin Buddy</div>
-    <div style="display:flex;align-items:center;gap:8px;">
+    <div class="topbar-right">
       <div class="live-pill" id="livePill">
         <div class="live-dot"></div>
         Live
       </div>
       <a href="/tutorial" style="padding:5px 12px;border-radius:20px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.07);backdrop-filter:blur(10px);font-family:'Syne Mono',monospace;font-size:0.7rem;color:#f0f0f0;text-decoration:none;">?</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
   </div>
 
-  <!-- Analyzing overlay -->
   <div class="analyzing" id="analyzingOverlay">
     <div class="analyzing-inner">
       <div class="spinner"></div>
@@ -431,22 +377,18 @@
     </div>
   </div>
 
-  <!-- Bottom bar (shutter) -->
   <div class="bottombar" id="bottomBar">
     <button class="shutter off" id="shutterBtn" onclick="handleShutter()">
       <div class="shutter-fill"></div>
     </button>
   </div>
 
-  <!-- Game panel -->
   <div class="game-panel" id="gamePanel">
     <div class="game-question">
       <div class="which">Which bin for</div>
       <div class="item-name" id="itemName">—</div>
     </div>
-
     <div class="bins-row">
-      <!-- Garbage -->
       <button class="bin-card" data-bin="Garbage" onclick="chooseBin('Garbage')">
         <div class="bin-icon">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -459,8 +401,6 @@
         </div>
         <span class="bin-label">Garbage</span>
       </button>
-
-      <!-- Recycling -->
       <button class="bin-card" data-bin="Recycling" onclick="chooseBin('Recycling')">
         <div class="bin-icon">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -471,8 +411,6 @@
         </div>
         <span class="bin-label">Recycling</span>
       </button>
-
-      <!-- Organic -->
       <button class="bin-card" data-bin="Organic" onclick="chooseBin('Organic')">
         <div class="bin-icon">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -484,8 +422,6 @@
         <span class="bin-label">Organic</span>
       </button>
     </div>
-
-    <!-- Reveal area -->
     <div class="explain-box" id="explainBox">
       <div class="verdict" id="verdict"></div>
       <div class="explain-text" id="explainText"></div>
@@ -493,7 +429,6 @@
     </div>
   </div>
 
-  <!-- Unclear panel -->
   <div class="unclear-panel" id="unclearPanel">
     <div class="unclear-icon">🔍</div>
     <div class="unclear-title">Can't identify this</div>
@@ -501,7 +436,6 @@
     <button class="retake-unclear-btn" onclick="retake()">Try a clearer photo</button>
   </div>
 
-  <!-- Bottom nav -->
   <nav class="bottom-nav">
     <a href="/learning" class="nav-item" style="text-decoration:none;">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -538,11 +472,19 @@
   </nav>
 
   <div class="toast" id="toast"></div>
-  <div><a href="/tutorial" class="nav-btn">?</a></div>
 
   <script>
+    // ── AUTH CHECK — redirect to login if no token ──
+    const authToken = localStorage.getItem('bb_token');
+    if (!authToken) window.location.replace('/login');
+
+    function logout() {
+      localStorage.removeItem('bb_token');
+      window.location.replace('/login');
+    }
+
     let stream = null;
-    let state = 'off'; // off | live | frozen | choosing | revealed | unclear
+    let state = 'off';
     let correctBin = null;
     let explanationText = null;
 
@@ -607,9 +549,19 @@
       try {
         const res = await fetch('/analyze', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + authToken   // ← sends JWT token
+          },
           body: JSON.stringify({ image: imageData })
         });
+
+        // Token expired or invalid — send back to login
+        if (res.status === 401) {
+          logout();
+          return;
+        }
+
         const data = await res.json();
 
         if (data.error) {
@@ -633,7 +585,6 @@
         explanationText = data.explanation;
         itemName.textContent = data.item;
 
-        // Enable all bin cards
         document.querySelectorAll('.bin-card').forEach(card => {
           card.classList.remove('correct', 'wrong-pick', 'dimmed', 'disabled');
           card.onclick = () => chooseBin(card.dataset.bin);
@@ -657,13 +608,9 @@
         const bin = card.dataset.bin;
         card.onclick = null;
         card.classList.add('disabled');
-        if (bin === correctBin) {
-          card.classList.add('correct');
-        } else if (bin === chosen) {
-          card.classList.add('wrong-pick');
-        } else {
-          card.classList.add('dimmed');
-        }
+        if (bin === correctBin) card.classList.add('correct');
+        else if (bin === chosen) card.classList.add('wrong-pick');
+        else card.classList.add('dimmed');
       });
 
       const isCorrect = chosen === correctBin;
@@ -676,7 +623,6 @@
     function retake() {
       correctBin = null;
       explanationText = null;
-
       snapshot.classList.remove('visible');
       video.classList.remove('frozen');
       analyzingOverlay.classList.remove('show');
