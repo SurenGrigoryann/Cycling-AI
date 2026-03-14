@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from auth import register_user, login_user
@@ -21,32 +21,8 @@ client = anthropic.Anthropic(api_key="sk-ant-api03-GYPFrCZZ1NcEI4A756wNC81ec3RX0
 def index():
     return render_template('index.html')
 
-@app.route('/register', methods=['POST'])
-def register():
-    data = request.get_json()
-    if not data.get('username') or not data.get('email') or not data.get('password'):
-        return jsonify({"success": False, "message": "All fields are required"}), 400
-    if len(data['password']) < 8:
-        return jsonify({"success": False, "message": "Password must be at least 8 characters"}), 400
-    if '@' not in data['email']:
-        return jsonify({"success": False, "message": "Invalid email address"}), 400
-    result = register_user(data['username'], data['email'], data['password'])
-    return jsonify(result)
-
-@app.route('/login', methods=['POST'])
-@limiter.limit("5 per minute")
-def login():
-    data = request.get_json()
-    result = login_user(data['username'], data['password'])
-    if result['success']:
-        token = create_access_token(identity=data['username'])
-        return jsonify({"success": True, "token": token})
-    return jsonify(result)
-
 @app.route('/analyze', methods=['POST'])
-@jwt_required()
 def analyze():
-    current_user = get_jwt_identity()
     data = request.get_json()
     image_data = data.get('image')
 
@@ -87,5 +63,24 @@ def analyze():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    result = register_user(data['username'], data['email'], data['password'])
+    return jsonify(result)
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    result = login_user(data['username'], data['password'])
+    return jsonify(result)
+
+@app.route('/tutorial')
+def tutorial():
+    return render_template('tutorial.html')
+
+
 if __name__ == '__main__':
     app.run(debug=True)
+
+
