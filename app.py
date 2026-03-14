@@ -5,12 +5,16 @@ from flask import Flask, render_template, request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from authfake import register_user, login_user, verify_email, request_password_reset, confirm_password_reset
+from auth import register_user, login_user, verify_email, request_password_reset, confirm_password_reset
+from Learning import learning_bp
+from Practice import practice_bp
 import os
 import json
 import anthropic
 
 app = Flask(__name__)
+app.register_blueprint(learning_bp)
+app.register_blueprint(practice_bp)
 
 app.config["JWT_SECRET_KEY"] = "x7k#mP9$qL2@nR5&vT8*wY3"
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600
