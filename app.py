@@ -18,32 +18,34 @@ def analyze():
     if ',' in image_data:
         image_data = image_data.split(',')[1]
 
-    response = client.messages.create(
-        model="claude-opus-4-6",
-        max_tokens=300,
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "image",
-                        "source": {
-                            "type": "base64",
-                            "media_type": "image/jpeg",
-                            "data": image_data
+    try:
+        response = client.messages.create(
+            model="claude-opus-4-6",
+            max_tokens=300,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": "image/jpeg",
+                                "data": image_data
+                            }
+                        },
+                        {
+                            "type": "text",
+                            "text": "What do you see in this image? Be concise and descriptive, max 2-3 sentences."
                         }
-                    },
-                    {
-                        "type": "text",
-                        "text": "What do you see in this image? Be concise and descriptive, max 2-3 sentences."
-                    }
-                ]
-            }
-        ]
-    )
-
-    result = response.content[0].text
-    return jsonify({'result': result})
+                    ]
+                }
+            ]
+        )
+        result = response.content[0].text
+        return jsonify({'result': result})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
