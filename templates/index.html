@@ -843,6 +843,7 @@
       });
 
       const isCorrect = chosen === correctBin;
+      playBuddyAnimation(isCorrect ? 'happy' : 'sad');
       verdict.textContent = isCorrect ? '✓ Correct!' : `✗ It's ${correctBin}`;
       verdict.className = 'verdict ' + (isCorrect ? 'correct' : 'wrong');
       explainText.textContent = explanationText;
@@ -869,5 +870,6 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
   </script>
+<script src="/static/buddy-animation.js"></script>
 </body>
 </html>

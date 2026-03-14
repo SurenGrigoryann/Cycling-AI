@@ -7,7 +7,10 @@ import random
 import time
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
 from flask_jwt_extended import create_access_token
+
+load_dotenv()
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "database.db")
 EMAIL_ADDRESS = os.environ.get("EMAIL_ADDRESS")

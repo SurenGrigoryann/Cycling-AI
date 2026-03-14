@@ -332,6 +332,7 @@
  function answer(el, correct, explanation) {
  if (answered) return;
  answered = true;
+ playBuddyAnimation(correct ? 'happy' : 'sad', { loop: true });
  el.parentElement.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
  el.classList.add(correct ? 'correct' : 'wrong');
  showFeedback(current, explanation, correct);
@@ -342,6 +343,7 @@
  function answerTF(el, correct, explanation) {
  if (answered) return;
  answered = true;
+ playBuddyAnimation(correct ? 'happy' : 'sad', { loop: true });
  el.parentElement.querySelectorAll('.tf-btn').forEach(b => b.disabled = true);
  el.classList.add(correct ? 'correct' : 'wrong');
  showFeedback(current, explanation, correct);
@@ -350,6 +352,7 @@
  }
 
  function next() {
+ dismissBuddyAnimation();
  if (current === TOTAL - 1) {
  localStorage.setItem('lesson_3_complete', 'true');
  current = TOTAL; updateUI(); return;
@@ -359,5 +362,6 @@
 
  updateUI();
  </script>
+<script src="/static/buddy-animation.js"></script>
 </body>
 </html>

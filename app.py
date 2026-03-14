@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_jwt_extended import JWTManager, create_access_token
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -109,6 +109,19 @@ def reset_password():
 @app.route('/tutorial')
 def tutorial():
     return render_template('tutorial.html')
+
+# Serve character animation frames with clean URLs
+@app.route('/asset/<animation>/<filename>')
+@limiter.exempt
+def serve_asset(animation, filename):
+    base = os.path.join(app.root_path, 'asset')
+    if animation == 'happy':
+        directory = os.path.join(base, 'happy asset', 'happy asset')
+    elif animation == 'sad':
+        directory = os.path.join(base, 'sad asset', 'sad asset')
+    else:
+        return 'Not found', 404
+    return send_from_directory(directory, filename)
 
 print(os.environ.get("EMAIL_ADDRESS"))
 print(os.environ.get("EMAIL_PASSWORD"))
