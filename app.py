@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from auth import register_user, login_user
@@ -22,9 +22,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/analyze', methods=['POST'])
-@jwt_required()
 def analyze():
-    current_user = get_jwt_identity()
     data = request.get_json()
     image_data = data.get('image')
 
