@@ -79,7 +79,7 @@ def verify():
 
 @app.route('/login', methods=['GET'])
 def login_page():
-    return render_template('login.html')
+    return render_template('login_page_FINAL.html')
 
 @app.route('/login', methods=['POST'])
 def login():
