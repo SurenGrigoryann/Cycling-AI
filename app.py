@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, s
 from flask_jwt_extended import JWTManager, create_access_token, decode_token
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from auth import register_user, login_user
+from auth import register_user, login_user, verify_code
 from functools import wraps
 import os
 import json
@@ -101,6 +101,12 @@ def login():
     return jsonify(result)
 
 # 4. ADDED: logout route to clear the session
+@app.route('/verify', methods=['POST'])
+def verify():
+    data = request.get_json()
+    result = verify_code(data['email'], data['code'])
+    return jsonify(result)
+
 @app.route('/logout')
 def logout():
     session.clear()
@@ -111,6 +117,8 @@ def logout():
 @login_required
 def tutorial():
     return render_template('tutorial.html')
+
+
 
 # Add this anywhere in app.py before the if __name__ == '__main__': line
 
