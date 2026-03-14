@@ -2,3 +2,4 @@ flask
 gunicorn
 anthropic
 flask-jwt-extended
+flask-limiter
