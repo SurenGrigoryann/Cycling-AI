@@ -1,21 +1,39 @@
-from flask import Flask, render_template, request, jsonify
-from flask_jwt_extended import JWTManager, create_access_token
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session
+from flask_jwt_extended import JWTManager, create_access_token, decode_token
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from auth import register_user, login_user
+from functools import wraps
 import os
 import json
 import anthropic
 
 app = Flask(__name__)
 
-app.config["JWT_SECRET_KEY"] = "x7k#mP9$qL2@nR5&vT8*wY3"
+app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "x7k#mP9$qL2@nR5&vT8*wY3")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "flask-session-secret")
 
 jwt = JWTManager(app)
 limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day"])
 
-client = anthropic.Anthropic(api_key="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")
+# 1. CHANGED: API key pulled from environment, not hardcoded
+client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+
+# 2. ADDED: login_required decorator to protect pages
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = session.get("access_token")
+        if not token:
+            return redirect(url_for("login_page"))
+        try:
+            decode_token(token)
+        except Exception:
+            session.clear()
+            return redirect(url_for("login_page"))
+        return f(*args, **kwargs)
+    return decorated
 
 @app.route('/')
 def index():
@@ -77,14 +95,28 @@ def login_page():
 def login():
     data = request.get_json()
     result = login_user(data['username'], data['password'])
+    # 3. ADDED: store token in session on successful login
+    if result.get("success") and result.get("token"):
+        session["access_token"] = result["token"]
     return jsonify(result)
 
+# 4. ADDED: logout route to clear the session
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login_page'))
+
+# 5. CHANGED: added @login_required to block unauthenticated access
 @app.route('/tutorial')
+@login_required
 def tutorial():
     return render_template('tutorial.html')
 
+# Add this anywhere in app.py before the if __name__ == '__main__': line
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return redirect(url_for('login_page'))
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
