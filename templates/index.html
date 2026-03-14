@@ -109,8 +109,8 @@
     /* BOTTOM BAR */
     .bottombar {
       position: fixed;
-      bottom: 0; left: 0; right: 0;
-      padding: 20px 40px max(env(safe-area-inset-bottom), 28px);
+      bottom: 60px; left: 0; right: 0;
+      padding: 20px 40px 20px;
       z-index: 10;
       display: flex;
       align-items: center;
@@ -119,6 +119,36 @@
       transition: opacity 0.3s;
     }
     .bottombar.hidden { opacity: 0; pointer-events: none; }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 11;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 0 max(env(safe-area-inset-bottom), 12px);
+      background: rgba(8,8,8,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--glass-border);
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 20px;
+      color: var(--muted);
+    }
+    .nav-item.active { color: var(--accent); }
+    .nav-label {
+      font-family: 'Syne Mono', monospace;
+      font-size: 0.52rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
 
     .shutter {
       width: 80px; height: 80px;
@@ -171,7 +201,7 @@
     /* UNCLEAR PANEL */
     .unclear-panel {
       position: fixed;
-      bottom: 0; left: 0; right: 0;
+      bottom: 60px; left: 0; right: 0;
       z-index: 10;
       padding: 36px 24px max(env(safe-area-inset-bottom), 36px);
       background: linear-gradient(to top, rgba(0,0,0,0.97) 60%, transparent 100%);
@@ -217,7 +247,7 @@
     /* GAME PANEL */
     .game-panel {
       position: fixed;
-      bottom: 0; left: 0; right: 0;
+      bottom: 60px; left: 0; right: 0;
       z-index: 10;
       padding: 24px 20px max(env(safe-area-inset-bottom), 32px);
       background: linear-gradient(to top, rgba(0,0,0,0.97) 60%, transparent 100%);
@@ -467,6 +497,42 @@
     <div class="unclear-subtitle" id="unclearItem"></div>
     <button class="retake-unclear-btn" onclick="retake()">Try a clearer photo</button>
   </div>
+
+  <!-- Bottom nav -->
+  <nav class="bottom-nav">
+    <a href="/learning" class="nav-item" style="text-decoration:none;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+      </svg>
+      <span class="nav-label">Learning</span>
+    </a>
+    <div class="nav-item active">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+        <circle cx="12" cy="13" r="4"/>
+      </svg>
+      <span class="nav-label">Camera</span>
+    </div>
+    <div class="nav-item">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 20h9"/>
+        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+      </svg>
+      <span class="nav-label">Practice</span>
+    </div>
+    <div class="nav-item">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+        <path d="M4 22h16"/>
+        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+        <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>
+      </svg>
+      <span class="nav-label">Game</span>
+    </div>
+  </nav>
 
   <div class="toast" id="toast"></div>
 

@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, jsonify
 import os
 import json
 import anthropic
-from auth import register_user, login_user
 
 app = Flask(__name__)
 client = anthropic.Anthropic(api_key="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")
@@ -10,6 +9,10 @@ client = anthropic.Anthropic(api_key="sk-ant-api03-GYPFrCZZ1NcEI4A756wNC81ec3RX0
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/learning')
+def learning():
+    return render_template('learning.html')
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
@@ -51,21 +54,7 @@ def analyze():
         result = json.loads(text)
         return jsonify(result)
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/register', methods=['POST'])
-def register():
-    data = request.get_json()
-    result = register_user(data['username'], data['email'], data['password'])
-    return jsonify(result)
-
-@app.route('/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    result = login_user(data['username'], data['password'])
-    return jsonify(result)
+        return jsonify({'error': str(e)}),
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
