@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Camera</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #000;
+      --red: #ff3b30;
+      --glass: rgba(255,255,255,0.12);
+      --glass-border: rgba(255,255,255,0.18);
+    }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: 'DM Sans', sans-serif;
+      color: #fff;
+    }
+    #video {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; z-index: 0;
+    }
+    #overlay {
+      position: fixed; inset: 0;
+      background: #000; z-index: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 16px; transition: opacity 0.4s ease;
+    }
+    #overlay.hidden { opacity: 0; pointer-events: none; }
+    #overlay svg { opacity: 0.3; }
+    #overlay p { font-size: 0.85rem; opacity: 0.4; letter-spacing: 0.05em; }
+    .top-bar {
+      position: fixed; top: 0; left: 0; right: 0;
+      padding: env(safe-area-inset-top, 16px) 20px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 10;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+    }
+    .live-badge {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+      opacity: 0; transition: opacity 0.4s;
+    }
+    .live-badge.show { opacity: 1; }
+    .live-dot {
+      width: 7px; height: 7px;
+      background: var(--red); border-radius: 50%;
+      animation: pulse 1.4s ease infinite;
+    }
+    .flip-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid var(--glass-border);
+      background: var(--glass);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #fff;
+      transition: transform 0.3s ease, background 0.2s;
+    }
+    .flip-btn:active { transform: rotate(180deg); background: rgba(255,255,255,0.25); }
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      padding: 24px 40px calc(env(safe-area-inset-bottom, 16px) + 24px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10;
+      background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+    }
+    .shutter {
+      width: 76px; height: 76px; border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.8);
+      background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.15s ease;
+    }
+    .shutter:active { transform: scale(0.93); }
+    .shutter-inner {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: #fff;
+      transition: background 0.2s, border-radius 0.2s, width 0.2s, height 0.2s;
+    }
+    .shutter.stop .shutter-inner {
+      background: var(--red); border-radius: 10px;
+      width: 28px; height: 28px;
+    }
+    .toast {
+      position: fixed; bottom: 130px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(255,59,48,0.9); backdrop-filter: blur(10px);
+      padding: 10px 20px; border-radius: 20px;
+      font-size: 0.78rem; white-space: nowrap;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s; z-index: 20;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+  <video id="video" autoplay playsinline muted></video>
+
+  <div id="overlay">
+    <svg width="72" height="72" fill="none" stroke="white" stroke-width="1.2" viewBox="0 0 24 24">
+      <path d="M15 10l4.553-2.277A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
+    </svg>
+    <p>Tap the button to start</p>
+  </div>
+
+  <div class="top-bar">
+    <div class="live-badge" id="liveBadge">
+      <div class="live-dot"></div>
+      Live
+    </div>
+    <button class="flip-btn" onclick="flipCamera()">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M4 4v5h5M20 20v-5h-5"/>
+        <path d="M4 9a8 8 0 0114.93-2.69M20 15A8 8 0 015.07 17.69"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="shutter" id="shutterBtn" onclick="toggleCamera()">
+      <div class="shutter-inner"></div>
+    </button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let stream = null;
+    let facingMode = 'environment';
+
+    const video = document.getElementById('video');
+    const overlay = document.getElementById('overlay');
+    const shutterBtn = document.getElementById('shutterBtn');
+    const liveBadge = document.getElementById('liveBadge');
+    const toast = document.getElementById('toast');
+
+    async function toggleCamera() {
+      stream ? stopCamera() : await startCamera();
+    }
+
+    async function startCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
+          audio: false
+        });
+        video.srcObject = stream;
+        overlay.classList.add('hidden');
+        shutterBtn.classList.add('stop');
+        liveBadge.classList.add('show');
+      } catch (err) {
+        showToast('Camera access denied');
+      }
+    }
+
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+        video.srcObject = null;
+      }
+      overlay.classList.remove('hidden');
+      shutterBtn.classList.remove('stop');
+      liveBadge.classList.remove('show');
+    }
+
+    async function flipCamera() {
+      facingMode = facingMode === 'environment' ? 'user' : 'environment';
+      if (stream) { stopCamera(); await startCamera(); }
+    }
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+  </script>
+</body>
+</html>
