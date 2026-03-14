@@ -69,6 +69,10 @@ def register():
     result = register_user(data['username'], data['email'], data['password'])
     return jsonify(result)
 
+@app.route('/login', methods=['GET'])
+def login_page():
+    return render_template('login_page.html')
+
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
