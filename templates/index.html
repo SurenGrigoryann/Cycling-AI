@@ -436,10 +436,14 @@
           body: JSON.stringify({ image: imageData })
         });
         const data = await res.json();
-        resultText.textContent = data.result;
-        resultPanel.classList.add('show');
+        if (data.error) {
+          showToast(data.error);
+        } else {
+          resultText.textContent = data.result;
+          resultPanel.classList.add('show');
+        }
       } catch (err) {
-        showToast('Something went wrong');
+        showToast(err.message || 'Something went wrong');
       } finally {
         analyzingOverlay.classList.remove('show');
         shutterBtn.disabled = false;
