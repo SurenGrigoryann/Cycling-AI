@@ -1,2 +1,4 @@
 ANTHROPIC_API_KEY=your-api-key-here
 JWT_SECRET_KEY=your-secret-key-here
+EMAIL_ADDRESS=bin.buddy.verbot@gmail.com
+EMAIL_PASSWORD=vrsm rnjs uivc fdzc

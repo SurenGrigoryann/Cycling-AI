@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Lesson 3 — Paper & Cardboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Syne+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #080808; --accent: #ffd54f; --text: #f5f5f5;
+      --muted: #555; --glass: rgba(255,255,255,0.05);
+      --glass-border: rgba(255,255,255,0.1); --green: #4caf50; --red: #ff3b30;
+    }
+    html, body { width: 100%; height: 100%; background: var(--bg); font-family: 'Syne', sans-serif; color: var(--text); overflow: hidden; }
+    .topbar { position: fixed; top: 0; left: 0; right: 0; padding: max(env(safe-area-inset-top), 16px) 20px 14px; z-index: 20; display: flex; align-items: center; gap: 14px; background: rgba(8,8,8,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--glass-border); }
+    .back-btn { background: none; border: none; color: var(--muted); cursor: pointer; padding: 4px; display: flex; align-items: center; }
+    .progress-bar-wrap { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.4s ease; width: 0%; }
+    .slide-count { font-family: 'Syne Mono', monospace; font-size: 0.55rem; letter-spacing: 0.1em; color: var(--muted); white-space: nowrap; }
+    .slides-wrap { position: fixed; top: 58px; bottom: 72px; left: 0; right: 0; overflow: hidden; }
+    .slides-track { display: flex; width: 1000%; height: 100%; transition: transform 0.4s cubic-bezier(0.4,0,0.2,1); }
+    .slide { width: 10%; height: 100%; overflow-y: auto; scrollbar-width: none; padding: 28px 24px 20px; display: flex; flex-direction: column; gap: 20px; }
+    .slide::-webkit-scrollbar { display: none; }
+    .slide-tag { font-family: 'Syne Mono', monospace; font-size: 0.5rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); }
+    .slide-title { font-size: 1.5rem; font-weight: 800; line-height: 1.2; }
+    .slide-body { font-size: 0.9rem; line-height: 1.65; color: rgba(245,245,245,0.8); }
+    .fact-card { background: rgba(255,213,79,0.06); border: 1px solid rgba(255,213,79,0.15); border-radius: 16px; padding: 18px 20px; font-size: 0.85rem; line-height: 1.55; color: rgba(245,245,245,0.85); }
+    .fact-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
+    .question-label { font-family: 'Syne Mono', monospace; font-size: 0.5rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+    .question-text { font-size: 1.15rem; font-weight: 700; line-height: 1.35; }
+    .choices { display: flex; flex-direction: column; gap: 10px; }
+    .choice-btn { width: 100%; background: var(--glass); border: 1.5px solid var(--glass-border); border-radius: 14px; padding: 16px 18px; color: var(--text); font-family: 'Syne', sans-serif; font-size: 0.88rem; font-weight: 600; text-align: left; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+    .choice-btn:active { transform: scale(0.98); }
+    .choice-btn.correct { border-color: var(--green); background: rgba(76,175,80,0.12); color: #a5d6a7; }
+    .choice-btn.wrong { border-color: var(--red); background: rgba(255,59,48,0.1); color: #ef9a9a; }
+    .choice-btn:disabled { cursor: default; }
+    .feedback-panel { border-radius: 14px; padding: 16px 18px; font-size: 0.82rem; line-height: 1.55; display: none; }
+    .feedback-panel.correct { background: rgba(76,175,80,0.1); border: 1px solid rgba(76,175,80,0.3); color: #a5d6a7; display: block; }
+    .feedback-panel.wrong { background: rgba(255,59,48,0.08); border: 1px solid rgba(255,59,48,0.25); color: #ef9a9a; display: block; }
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 14px 24px max(env(safe-area-inset-bottom), 16px); background: rgba(8,8,8,0.92); backdrop-filter: blur(12px); border-top: 1px solid var(--glass-border); }
+    .continue-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--accent); color: #080808; font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800; letter-spacing: 0.05em; cursor: pointer; transition: opacity 0.2s, transform 0.1s; }
+    .continue-btn:disabled { opacity: 0.2; cursor: default; }
+    .continue-btn:not(:disabled):active { transform: scale(0.98); }
+    .completion-slide { align-items: center; justify-content: center; text-align: center; gap: 24px; }
+    .completion-icon { font-size: 5rem; }
+    .completion-title { font-size: 1.8rem; font-weight: 800; }
+    .completion-sub { font-size: 0.9rem; color: rgba(245,245,245,0.5); line-height: 1.5; }
+    .home-btn { margin-top: 8px; padding: 14px 36px; border-radius: 14px; border: none; background: var(--accent); color: #080808; font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <button class="back-btn" onclick="window.location='/learning'">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
+    </button>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="slide-count" id="slideCount">1 / 10</div>
+  </div>
+
+  <div class="slides-wrap">
+    <div class="slides-track" id="track">
+
+      <!-- SLIDE 0: Theory -->
+      <div class="slide">
+        <div class="slide-tag">Lesson 3 · Paper & Cardboard</div>
+        <div class="slide-title">What Paper Can Be Recycled?</div>
+        <div class="slide-body">Paper and cardboard are among the most recycled materials in the world. Most clean, dry paper products can go straight into the recycling bin.</div>
+        <div class="fact-card">
+          <span class="fact-icon">📄</span>
+          <strong>Recyclable paper:</strong> Newspapers, magazines, office paper, envelopes, cardboard boxes, cereal boxes, paper bags, and egg cartons.
+        </div>
+      </div>
+
+      <!-- SLIDE 1: Question -->
+      <div class="slide">
+        <div class="question-label">Question 1 of 5</div>
+        <div class="question-text">A clean, dry cardboard cereal box — which bin?</div>
+        <div class="choices">
+          <button class="choice-btn" onclick="answer(this, false, '❌ Cardboard cereal boxes are recyclable, not organic waste.')">🟢 Organic bin</button>
+          <button class="choice-btn" onclick="answer(this, true, '✅ Correct! Clean, dry cardboard boxes are perfect for the recycling bin.')">🔵 Recycling bin</button>
+          <button class="choice-btn" onclick="answer(this, false, '❌ Don\'t trash it! Dry cardboard is highly recyclable and should go in the recycling bin.')">🗑️ Garbage bin</button>
+        </div>
+        <div class="feedback-panel" id="fb1"></div>
+      </div>
+
+      <!-- SLIDE 2: Theory -->
+      <div class="slide">
+        <div class="slide-tag">Lesson 3 · Paper & Cardboard</div>
+        <div class="slide-title">The Pizza Box Rule</div>
+        <div class="slide-body">Pizza boxes are a famous recycling dilemma. The answer depends on how greasy they are — grease ruins the paper recycling process.</div>
+        <div class="fact-card">
+          <span class="fact-icon">🍕</span>
+          <strong>Clean top half</strong> → Recycling bin.<br/>
+          <strong>Greasy bottom half</strong> → Organic bin (it can compost!) or Garbage.<br/>
+          When in doubt, tear the box in half and sort each piece separately.
+        </div>
+      </div>
+
+      <!-- SLIDE 3: Question -->
+      <div class="slide">
+        <div class="question-label">Question 2 of 5</div>
+        <div class="question-text">A pizza box that's very greasy on the bottom — where does it go?</div>
+        <div class="choices">
+          <button class="choice-btn" onclick="answer(this, false, '❌ Greasy cardboard contaminates paper recycling. The greasy part goes in Organic or Garbage.')">🔵 Recycling bin</button>
+          <button class="choice-btn" onclick="answer(this, true, '✅ Correct! Greasy pizza boxes can\'t be recycled. The greasy part goes in Organic or Garbage.')">🗑️ Garbage or Organic bin</button>
+          <button class="choice-btn" onclick="answer(this, false, '❌ Grease doesn\'t compost well in large amounts. Garbage is better for very greasy cardboard.')">🟢 Organic bin only</button>
+        </div>
+        <div class="feedback-panel" id="fb3"></div>
+      </div>
+
+      <!-- SLIDE 4: Theory -->
+      <div class="slide">
+        <div class="slide-tag">Lesson 3 · Paper & Cardboard</div>
+        <div class="slide-title">Paper That Cannot Be Recycled</div>
+        <div class="slide-body">Not all paper is recyclable. Some paper is coated, waxed, or contaminated — and these types ruin entire batches of recycling.</div>
+        <div class="fact-card">
+          <span class="fact-icon">🚫</span>
+          <strong>Goes in Garbage:</strong> Waxed paper, thermal receipt paper, plastic-coated paper cups, paper soaked in chemicals, laminated paper, and stickers.
+        </div>
+      </div>
+
+      <!-- SLIDE 5: Question -->
+      <div class="slide">
+        <div class="question-label">Question 3 of 5</div>
+        <div class="question-text">A paper coffee cup with a plastic lining — which bin?</div>
+        <div class="choices">
+          <button class="choice-btn" onclick="answer(this, false, '❌ Paper cups have a plastic lining that prevents recycling. They go in Garbage.')">🔵 Recycling bin</button>
+          <button class="choice-btn" onclick="answer(this, true, '✅ Correct! Paper cups are coated with plastic inside and can\'t be recycled in regular bins.')">🗑️ Garbage bin</button>
+          <button class="choice-btn" onclick="answer(this, false, '❌ Paper cups aren\'t compostable — the plastic lining prevents it. They go in Garbage.')">🟢 Organic bin</button>
+        </div>
+        <div class="feedback-panel" id="fb5"></div>
+      </div>
+
+      <!-- SLIDE 6: Theory -->
+      <div class="slide">
+        <div class="slide-tag">Lesson 3 · Paper & Cardboard</div>
+        <div class="slide-title">Flatten Your Cardboard</div>
+        <div class="slide-body">Large cardboard boxes take up enormous space in recycling bins and trucks. Flattening them makes room for more recycling and helps the whole system work better.</div>
+        <div class="fact-card">
+          <span class="fact-icon">📦</span>
+          Always flatten cardboard boxes before recycling. Remove any packing material inside — bubble wrap and styrofoam fillers go in Garbage, not recycling.
+        </div>
+      </div>
+
+      <!-- SLIDE 7: Question -->
+      <div class="slide">
+        <div class="question-label">Question 4 of 5</div>
+        <div class="question-text">You have a large Amazon delivery box. What should you do before recycling it?</div>
+        <div class="choices">
+          <button class="choice-btn" onclick="answer(this, false, '❌ Boxes should be flattened first to save space in recycling bins and trucks.')">♻️ Put it in recycling as-is</button>
+          <button class="choice-btn" onclick="answer(this, true, '✅ Correct! Flatten the box to save space. Remove any plastic filler — that goes in Garbage.')">📦 Flatten it, then recycle</button>
+          <button class="choice-btn" onclick="answer(this, false, '❌ Clean cardboard boxes are perfectly recyclable — no need to throw them away.')">🗑️ Throw it in Garbage</button>
+        </div>
+        <div class="feedback-panel" id="fb7"></div>
+      </div>
+
+      <!-- SLIDE 8: Theory -->
+      <div class="slide">
+        <div class="slide-tag">Lesson 3 · Paper & Cardboard</div>
+        <div class="slide-title">Paper Gets Recycled 7 Times</div>
+        <div class="slide-body">Paper fibres get shorter every time they're recycled. After about 7 cycles, the fibres become too short to use — but by then, your paper has done enormous good!</div>
+        <div class="fact-card">
+          <span class="fact-icon">🌳</span>
+          Recycling one tonne of paper saves <strong>17 trees</strong>, 7,000 gallons of water, and enough energy to power a home for 6 months. Every sheet counts.
+        </div>
+      </div>
+
+      <!-- SLIDE 9: Question -->
+      <div class="slide">
+        <div class="question-label">Question 5 of 5</div>
+        <div class="question-text">A shiny, laminated poster — which bin?</div>
+        <div class="choices">
+          <button class="choice-btn" onclick="answer(this, false, '❌ Laminated paper has a plastic coating that makes it impossible to recycle with regular paper.')">🔵 Recycling bin</button>
+          <button class="choice-btn" onclick="answer(this, false, '❌ Laminated posters are not compostable — the plastic coating doesn\'t break down.')">🟢 Organic bin</button>
+          <button class="choice-btn" onclick="answer(this, true, '✅ Correct! Laminated paper is coated with plastic and cannot be recycled or composted. Garbage it is.')">🗑️ Garbage bin</button>
+        </div>
+        <div class="feedback-panel" id="fb9"></div>
+      </div>
+
+      <!-- SLIDE 10: Completion -->
+      <div class="slide completion-slide">
+        <div class="completion-icon">🏆</div>
+        <div class="completion-title">All Lessons Done!</div>
+        <div class="completion-sub">You've completed all 3 lessons.<br/>You're now a sorting expert!</div>
+        <button class="home-btn" onclick="window.location='/learning'">Back to Learning</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="continue-btn" id="continueBtn" onclick="next()">Continue</button>
+  </div>
+
+  <script>
+    if (!localStorage.getItem('lesson_2_complete')) { window.location.replace('/learning'); }
+    const TOTAL = 10;
+    let current = 0;
+    let answered = false;
+    const theorySlides = new Set([0, 2, 4, 6, 8]);
+
+    function updateUI() {
+      document.getElementById('track').style.transform = `translateX(-${current * 10}%)`;
+      document.getElementById('progressFill').style.width = `${(current / TOTAL) * 100}%`;
+      document.getElementById('slideCount').textContent = current < TOTAL ? `${current + 1} / ${TOTAL}` : 'Done';
+      const btn = document.getElementById('continueBtn');
+      if (current === TOTAL) { btn.style.display = 'none'; return; }
+      if (theorySlides.has(current)) { btn.disabled = false; btn.textContent = 'Continue'; }
+      else { btn.disabled = !answered; btn.textContent = answered ? 'Continue' : 'Choose an answer'; }
+    }
+
+    function answer(el, correct, explanation) {
+      if (answered) return;
+      answered = true;
+      el.parentElement.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+      el.classList.add(correct ? 'correct' : 'wrong');
+      const fb = document.getElementById('fb' + current);
+      if (fb) { fb.textContent = explanation; fb.className = 'feedback-panel ' + (correct ? 'correct' : 'wrong'); }
+      const btn = document.getElementById('continueBtn');
+      btn.disabled = false; btn.textContent = 'Continue';
+    }
+
+    function next() {
+      if (current === TOTAL - 1) {
+        localStorage.setItem('lesson_3_complete', 'true');
+        current = TOTAL; updateUI(); return;
+      }
+      current++; answered = false; updateUI();
+    }
+
+    updateUI();
+  </script>
+</body>
+</html>
