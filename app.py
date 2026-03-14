@@ -75,6 +75,11 @@ def login():
     result = login_user(data['username'], data['password'])
     return jsonify(result)
 
+@app.route('/tutorial')
+def tutorial():
+    return render_template('tutorial.html')
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
