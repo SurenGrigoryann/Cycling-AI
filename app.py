@@ -18,6 +18,10 @@ app.register_blueprint(learning_bp)
 app.register_blueprint(practice_bp)
 app.register_blueprint(game_bp)
 
+@app.errorhandler(Exception)
+def handle_error(_e):
+    return jsonify({'success': False, 'message': 'Server error. Please try again.'}), 500
+
 app.config["JWT_SECRET_KEY"] = "x7k#mP9$qL2@nR5&vT8*wY3"
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 60 * 60 * 24 * 30  # 30 days
 
@@ -74,14 +78,23 @@ def analyze():
 
 @app.route('/register', methods=['POST'])
 def register():
-    data = request.get_json()
-    result = register_user(data['username'], data['email'], data['password'])
+    data = request.get_json(force=True, silent=True) or {}
+    username = data.get('username', '').strip()
+    email = data.get('email', '').strip()
+    password = data.get('password', '')
+    if not username or not email or not password:
+        return jsonify({'success': False, 'message': 'Missing required fields.'})
+    result = register_user(username, email, password)
     return jsonify(result)
 
 @app.route('/verify', methods=['POST'])
 def verify():
-    data = request.get_json()
-    result = verify_email(data['email'], data['code'])
+    data = request.get_json(force=True, silent=True) or {}
+    email = data.get('email', '').strip()
+    code = data.get('code', '').strip()
+    if not email or not code:
+        return jsonify({'success': False, 'message': 'Missing fields.'})
+    result = verify_email(email, code)
     return jsonify(result)
 
 @app.route('/login', methods=['GET'])
@@ -90,22 +103,34 @@ def login_page():
 
 @app.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    result = login_user(data['username'], data['password'])
+    data = request.get_json(force=True, silent=True) or {}
+    username = data.get('username', '').strip()
+    password = data.get('password', '')
+    if not username or not password:
+        return jsonify({'success': False, 'message': 'Missing credentials.'})
+    result = login_user(username, password)
     return jsonify(result)
 
 @app.route('/forgot-password', methods=['POST'])
 def forgot_password():
-    data = request.get_json()
+    data = request.get_json(force=True, silent=True) or {}
+    email = data.get('email', '').strip()
+    if not email:
+        return jsonify({'success': False, 'message': 'Missing email.'})
     user_agent = request.headers.get('User-Agent', 'Unknown device')
     device_info = user_agent[:120]
-    result = request_password_reset(data['email'], device_info)
+    result = request_password_reset(email, device_info)
     return jsonify(result)
 
 @app.route('/reset-password', methods=['POST'])
 def reset_password():
-    data = request.get_json()
-    result = confirm_password_reset(data['email'], data['code'], data['new_password'])
+    data = request.get_json(force=True, silent=True) or {}
+    email = data.get('email', '').strip()
+    code = data.get('code', '').strip()
+    new_password = data.get('new_password', '')
+    if not email or not code or not new_password:
+        return jsonify({'success': False, 'message': 'Missing fields.'})
+    result = confirm_password_reset(email, code, new_password)
     return jsonify(result)
 
 @app.route('/tutorial')
