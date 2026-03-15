@@ -186,6 +186,27 @@
             color: var(--accent);
         }
 
+        #bestDisplay {
+            font-family: 'Syne Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.05em;
+        }
+
+        .new-record-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: #111;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+        }
+
         #timerDisplay {
             font-family: 'Syne Mono', monospace;
             font-size: 1.4rem;
@@ -326,6 +347,7 @@
         <div class="card">
             <h1>Sort It!</h1>
             <p>Drag the falling garbage into the correct bin.<br>Be quick and accurate!</p>
+            <p id="bestScoreStart" style="font-family:'Syne Mono',monospace;font-size:0.9rem;color:var(--accent);margin-bottom:8px;"></p>
             <div class="instructions">
                 <div class="inst-item">
                     <img src="/game/asset/organictrash.png" alt="Organic">
@@ -351,7 +373,10 @@
     <!-- ===== GAME SCREEN ===== -->
     <div id="gameScreen" class="hidden">
         <div id="hud">
-            <div id="scoreDisplay">SCORE: 0</div>
+            <div>
+                <div id="scoreDisplay">SCORE: 0</div>
+                <div id="bestDisplay"></div>
+            </div>
             <div id="timerDisplay">1:00</div>
         </div>
         <div id="gameArea"></div>
@@ -375,8 +400,10 @@
     <div id="gameOverScreen" class="overlay hidden">
         <div class="card">
             <h2>Game Over!</h2>
+            <div id="newRecordBadge" class="new-record-badge" style="display:none;">🏆 New Record!</div>
             <div class="final-score" id="finalScore">0</div>
             <div class="score-msg" id="scoreMsg">Good job!</div>
+            <p id="bestScoreEnd" style="font-family:'Syne Mono',monospace;font-size:0.85rem;color:rgba(255,255,255,0.5);margin-bottom:16px;"></p>
             <div>
                 <button id="restartBtn" class="btn btn-primary">Play Again</button>
                 <button id="homeBtn" class="btn btn-secondary">Back to Home</button>
@@ -386,6 +413,8 @@
 
     <script>
     (function() {
+        const authToken = localStorage.getItem('bb_token');
+
         // ===== ELEMENTS =====
         const startScreen = document.getElementById('startScreen');
         const gameScreen = document.getElementById('gameScreen');
@@ -394,14 +423,35 @@
         const restartBtn = document.getElementById('restartBtn');
         const homeBtn = document.getElementById('homeBtn');
         const scoreDisplay = document.getElementById('scoreDisplay');
+        const bestDisplay = document.getElementById('bestDisplay');
         const timerDisplay = document.getElementById('timerDisplay');
         const gameArea = document.getElementById('gameArea');
         const finalScoreEl = document.getElementById('finalScore');
         const scoreMsgEl = document.getElementById('scoreMsg');
+        const bestScoreStart = document.getElementById('bestScoreStart');
+        const bestScoreEnd = document.getElementById('bestScoreEnd');
+        const newRecordBadge = document.getElementById('newRecordBadge');
         const bins = document.querySelectorAll('.bin');
 
         // ===== STATE =====
         let allItems = [];
+        let bestScore = 0;
+
+        // ===== LOAD BEST SCORE =====
+        if (authToken) {
+            fetch('/game/score', {
+                headers: { 'Authorization': 'Bearer ' + authToken }
+            })
+            .then(r => r.json())
+            .then(data => {
+                bestScore = data.best_score || 0;
+                if (bestScore > 0) {
+                    bestScoreStart.textContent = '🏆 Best: ' + bestScore;
+                    bestDisplay.textContent = 'BEST: ' + bestScore;
+                }
+            })
+            .catch(() => {});
+        }
         let score = 0;
         let timeLeft = 60;
         let gameRunning = false;
@@ -760,6 +810,7 @@
 
             // Show game over
             finalScoreEl.textContent = score;
+            newRecordBadge.style.display = 'none';
 
             let msg;
             if (score >= 2500) msg = 'Recycling Champion! \u{1F3C6}';
@@ -767,6 +818,31 @@
             else if (score >= 500) msg = 'Good Job! \u{1F44D}';
             else msg = 'Keep Practicing! \u{1F4AA}';
             scoreMsgEl.textContent = msg;
+
+            // Save score & check record
+            if (authToken) {
+                fetch('/game/score', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + authToken
+                    },
+                    body: JSON.stringify({ score: score })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.is_new_record) {
+                        bestScore = score;
+                        newRecordBadge.style.display = 'inline-block';
+                        bestScoreStart.textContent = '🏆 Best: ' + bestScore;
+                        bestDisplay.textContent = 'BEST: ' + bestScore;
+                        bestScoreEnd.textContent = '';
+                    } else {
+                        bestScoreEnd.textContent = '🏆 Best: ' + bestScore;
+                    }
+                })
+                .catch(() => {});
+            }
 
             gameScreen.classList.add('hidden');
             gameOverScreen.classList.remove('hidden');

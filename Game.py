@@ -1,7 +1,22 @@
-from flask import Blueprint, render_template, jsonify, send_from_directory, current_app
+from flask import Blueprint, render_template, jsonify, send_from_directory, current_app, request
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from auth import get_db
 import os
 
 game_bp = Blueprint('game', __name__)
+
+def init_scores_table():
+    conn = get_db()
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS game_scores (
+            username TEXT PRIMARY KEY,
+            best_score INTEGER DEFAULT 0
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+init_scores_table()
 
 
 @game_bp.route('/game')
@@ -34,6 +49,34 @@ def serve_emoji(category, filename):
     directory = os.path.join(current_app.root_path, 'asset', 'emoji_only_organics_paper_waste_200_png', category)
     return send_from_directory(directory, filename)
 
+
+@game_bp.route('/game/score', methods=['GET'])
+@jwt_required()
+def get_score():
+    username = get_jwt_identity()
+    conn = get_db()
+    row = conn.execute('SELECT best_score FROM game_scores WHERE username = ?', (username,)).fetchone()
+    conn.close()
+    return jsonify({'best_score': row['best_score'] if row else 0})
+
+@game_bp.route('/game/score', methods=['POST'])
+@jwt_required()
+def save_score():
+    username = get_jwt_identity()
+    data = request.get_json()
+    new_score = int(data.get('score', 0))
+    conn = get_db()
+    row = conn.execute('SELECT best_score FROM game_scores WHERE username = ?', (username,)).fetchone()
+    is_new_record = False
+    if row is None:
+        conn.execute('INSERT INTO game_scores (username, best_score) VALUES (?, ?)', (username, new_score))
+        is_new_record = new_score > 0
+    elif new_score > row['best_score']:
+        conn.execute('UPDATE game_scores SET best_score = ? WHERE username = ?', (new_score, username))
+        is_new_record = True
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True, 'is_new_record': is_new_record})
 
 @game_bp.route('/game/asset/<filename>')
 def serve_game_asset(filename):
