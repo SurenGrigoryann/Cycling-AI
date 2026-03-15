@@ -224,6 +224,7 @@
     }
 
     .app-name-wrap {
+      position: absolute; left: 50%; transform: translateX(-50%);
       display: flex; align-items: center; gap: 8px;
     }
     .app-name-icon {
@@ -233,9 +234,9 @@
       display: flex; align-items: center; justify-content: center;
     }
     .app-name {
-      font-size: 1rem;
+      font-size: 1.5rem;
       font-weight: 800;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--accent);
     }
@@ -578,6 +579,10 @@
 
   <!-- ── TOPBAR ── -->
   <div class="topbar">
+    <div style="display:flex;align-items:center;gap:8px;visibility:hidden;">
+      <div class="app-name-icon"></div>
+      <div class="app-name">Bin Buddy</div>
+    </div>
     <div class="app-name-wrap">
       <div class="app-name-icon">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">

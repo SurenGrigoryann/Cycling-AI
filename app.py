@@ -125,8 +125,6 @@ def serve_asset(animation, filename):
         return 'Not found', 404
     return send_from_directory(directory, filename)
 
-print(os.environ.get("EMAIL_ADDRESS"))
-print(os.environ.get("EMAIL_PASSWORD"))
 
 if __name__ == '__main__':
     app.run(debug=True)
