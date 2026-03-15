@@ -34,8 +34,8 @@
       width: 100%; height: 100%;
       object-fit: cover;
       z-index: 0;
-      transform: scaleX(-1);
     }
+    #video.mirrored { transform: scaleX(-1); }
     #video.frozen { display: none; }
     #snapshot {
       position: fixed; inset: 0;
@@ -742,6 +742,7 @@
     let state = 'off';
     let correctBin = null;
     let explanationText = null;
+    let isFrontCamera = false;
 
     const video = document.getElementById('video');
     const snapshot = document.getElementById('snapshot');
@@ -772,6 +773,10 @@
           audio: false
         });
         video.srcObject = stream;
+        const track = stream.getVideoTracks()[0];
+        const settings = track.getSettings();
+        isFrontCamera = settings.facingMode === 'user' || !settings.facingMode;
+        video.classList.toggle('mirrored', isFrontCamera);
         offScreen.classList.add('hidden');
         livePill.classList.add('show');
         shutterBtn.classList.remove('off');
@@ -786,8 +791,10 @@
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
       ctx.save();
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
+      if (isFrontCamera) {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+      }
       ctx.drawImage(video, 0, 0);
       ctx.restore();
       const imageData = canvas.toDataURL('image/jpeg', 0.85);
