@@ -5,6 +5,7 @@ import re
 import smtplib
 import random
 import time
+import threading
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
@@ -40,9 +41,13 @@ def send_email(to, subject, html_body):
     msg["From"]    = EMAIL_ADDRESS
     msg["To"]      = to
     msg.attach(MIMEText(html_body, "html"))
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as smtp:
         smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
         smtp.send_message(msg)
+
+def send_email_async(to, subject, html_body):
+    t = threading.Thread(target=send_email, args=(to, subject, html_body), daemon=True)
+    t.start()
 
 def register_user(username, email, password):
     ok, msg = validate_password(password)
@@ -91,11 +96,7 @@ def register_user(username, email, password):
       <p style="color:#333;font-size:10px;text-align:center;">If you did not create a Bin Buddy account, ignore this email.</p>
     </div>
     """
-    try:
-        send_email(email, "Verify your Bin Buddy account", html)
-    except Exception as e:
-        return {"success": False, "message": f"Account created but email failed to send: {e}"}
-
+    send_email_async(email, "Verify your Bin Buddy account", html)
     return {"success": True, "message": "Account created. Check your email for a verification code."}
 
 
@@ -183,11 +184,7 @@ def request_password_reset(email, device_info):
       <p style="color:#333;font-size:10px;text-align:center;">Bin Buddy will never ask for your password via email.</p>
     </div>
     """
-    try:
-        send_email(email, "Password Reset Request — Bin Buddy", html)
-    except Exception as e:
-        return {"success": False, "message": f"Failed to send email: {e}"}
-
+    send_email_async(email, "Password Reset Request — Bin Buddy", html)
     return {"success": True, "message": "If that email exists, a reset code has been sent."}
 
 
