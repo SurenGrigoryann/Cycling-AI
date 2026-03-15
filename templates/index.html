@@ -694,7 +694,7 @@
       </div>
       <span class="nav-label">Practice</span>
     </div>
-    <div class="nav-item">
+    <a href="/game" class="nav-item" style="text-decoration:none;">
       <div class="nav-icon-wrap">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
@@ -706,7 +706,7 @@
         </svg>
       </div>
       <span class="nav-label">Game</span>
-    </div>
+    </a>
   </nav>
 
   <div class="toast" id="toast"></div>
@@ -843,7 +843,7 @@
       });
 
       const isCorrect = chosen === correctBin;
-      playBuddyAnimation(isCorrect ? 'happy' : 'sad');
+      playBuddyAnimation(isCorrect ? 'happy' : 'sad', { loop: true });
       verdict.textContent = isCorrect ? '✓ Correct!' : `✗ It's ${correctBin}`;
       verdict.className = 'verdict ' + (isCorrect ? 'correct' : 'wrong');
       explainText.textContent = explanationText;
@@ -851,6 +851,7 @@
     }
 
     function retake() {
+      dismissBuddyAnimation();
       correctBin = null;
       explanationText = null;
       snapshot.classList.remove('visible');

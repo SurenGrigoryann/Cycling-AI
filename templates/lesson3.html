@@ -332,7 +332,7 @@
  function answer(el, correct, explanation) {
  if (answered) return;
  answered = true;
- playBuddyAnimation(correct ? 'happy' : 'sad', { loop: true });
+ playBuddyAnimation(correct ? 'happy' : 'sad', { loop: true, position: 'bottom-right' });
  el.parentElement.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
  el.classList.add(correct ? 'correct' : 'wrong');
  showFeedback(current, explanation, correct);
@@ -343,7 +343,7 @@
  function answerTF(el, correct, explanation) {
  if (answered) return;
  answered = true;
- playBuddyAnimation(correct ? 'happy' : 'sad', { loop: true });
+ playBuddyAnimation(correct ? 'happy' : 'sad', { loop: true, position: 'bottom-right' });
  el.parentElement.querySelectorAll('.tf-btn').forEach(b => b.disabled = true);
  el.classList.add(correct ? 'correct' : 'wrong');
  showFeedback(current, explanation, correct);
