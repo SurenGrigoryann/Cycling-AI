@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Sort It! - Garbage Sorting Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --accent: #c8ff00;
+            --text: #f5f5f5;
+            --glass: rgba(255,255,255,0.08);
+            --green: #4ade80;
+            --red: #f87171;
+            --orange: #fbbf24;
+            --blue: #60a5fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            width: 100vw;
+            height: 100dvh;
+            position: relative;
+        }
+
+        /* ===== OVERLAY SCREENS ===== */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            background: rgba(10, 10, 30, 0.92);
+            transition: opacity 0.4s ease;
+        }
+
+        #startScreen {
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            padding: 16px;
+        }
+
+        /* ===== LEADERBOARD ===== */
+        .leaderboard-panel {
+            background: linear-gradient(160deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 0;
+            width: 300px;
+            flex-shrink: 0;
+            overflow: hidden;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+        }
+        .lb-header {
+            background: linear-gradient(135deg, rgba(200,255,0,0.12), rgba(200,255,0,0.04));
+            border-bottom: 1px solid rgba(200,255,0,0.15);
+            padding: 20px 22px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .lb-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: -0.3px;
+        }
+        .lb-subtitle {
+            font-family: 'Syne Mono', monospace;
+            font-size: 0.55rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.3);
+        }
+        .lb-body { padding: 12px 14px 16px; }
+        .lb-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 10px;
+            border-radius: 12px;
+            margin-bottom: 3px;
+            transition: background 0.2s;
+            position: relative;
+        }
+        .lb-row:hover { background: rgba(255,255,255,0.05); }
+        .lb-row.top1 {
+            background: linear-gradient(90deg, rgba(255,215,0,0.12), rgba(255,215,0,0.04));
+            border: 1px solid rgba(255,215,0,0.2);
+        }
+        .lb-row.top2 {
+            background: linear-gradient(90deg, rgba(192,192,192,0.1), rgba(192,192,192,0.03));
+            border: 1px solid rgba(192,192,192,0.15);
+        }
+        .lb-row.top3 {
+            background: linear-gradient(90deg, rgba(205,127,50,0.1), rgba(205,127,50,0.03));
+            border: 1px solid rgba(205,127,50,0.15);
+        }
+        .lb-row.me {
+            background: linear-gradient(90deg, rgba(200,255,0,0.1), rgba(200,255,0,0.03));
+            border: 1px solid rgba(200,255,0,0.25);
+        }
+        .lb-rank {
+            font-family: 'Syne Mono', monospace;
+            font-size: 1rem;
+            width: 28px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .lb-rank.num {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.25);
+        }
+        .lb-avatar {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.5);
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+        .lb-row.top1 .lb-avatar { background: rgba(255,215,0,0.15); color: #ffd700; }
+        .lb-row.top2 .lb-avatar { background: rgba(192,192,192,0.15); color: #c0c0c0; }
+        .lb-row.top3 .lb-avatar { background: rgba(205,127,50,0.15); color: #cd7f32; }
+        .lb-row.me   .lb-avatar { background: rgba(200,255,0,0.15); color: var(--accent); }
+        .lb-name {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text);
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .lb-row.me .lb-name::after {
+            content: ' (you)';
+            font-size: 0.65rem;
+            color: var(--accent);
+            font-weight: 400;
+        }
+        .lb-score {
+            font-family: 'Syne Mono', monospace;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.06);
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        .lb-row.top1 .lb-score { color: #ffd700; background: rgba(255,215,0,0.1); }
+        .lb-row.me   .lb-score { color: var(--accent); background: rgba(200,255,0,0.1); }
+        .lb-empty {
+            text-align: center;
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.25);
+            padding: 32px 0;
+            line-height: 1.6;
+        }
+        .lb-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.06);
+            margin: 6px 0;
+        }
+        @media (max-width: 700px) {
+            #startScreen { flex-direction: column; gap: 16px; overflow-y: auto; padding-bottom: 80px; }
+            .leaderboard-panel { width: 90%; max-width: 360px; }
+        }
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 24px;
+            padding: 48px 40px;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+        }
+
+        .card h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        .card h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            font-size: 1.05rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .card .final-score {
+            font-family: 'Syne Mono', monospace;
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin: 16px 0;
+        }
+
+        .card .score-msg {
+            font-size: 1.2rem;
+            color: var(--orange);
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 36px;
+            border: none;
+            border-radius: 14px;
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            margin: 6px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #111;
+        }
+
+        .btn-secondary {
+            background: var(--glass);
+            color: var(--text);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .instructions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .instructions .inst-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+        }
+        .instructions .inst-item img {
+            width: 52px;
+            height: 52px;
+            object-fit: contain;
+        }
+
+        /* ===== GAME SCREEN ===== */
+        #gameScreen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            background-image: url('/game/asset/backgroundfinal.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        #gameScreen.hidden {
+            display: none;
+        }
+
+        /* HUD */
+        #hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            height: 54px;
+            flex-shrink: 0;
+        }
+
+        #scoreDisplay {
+            font-family: 'Syne Mono', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        #bestDisplay {
+            font-family: 'Syne Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.05em;
+        }
+
+        .new-record-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: #111;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+        }
+
+        #timerDisplay {
+            font-family: 'Syne Mono', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text);
+            transition: color 0.3s;
+        }
+        #timerDisplay.urgent {
+            color: var(--red);
+            animation: pulse 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 1; }
+            to { opacity: 0.5; }
+        }
+
+        /* GAME AREA */
+        #gameArea {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* FALLING ITEMS */
+        .falling-item {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            cursor: grab;
+            touch-action: none;
+            z-index: 10;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+            transition: transform 0.1s ease;
+        }
+        .falling-item:active {
+            cursor: grabbing;
+        }
+        .falling-item.dragging {
+            z-index: 200;
+            transform: scale(1.15);
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
+        }
+
+        /* BINS AREA */
+        #binsArea {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 16px;
+            padding: 10px 16px 16px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
+            flex-shrink: 0;
+            z-index: 50;
+        }
+
+        .bin {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            flex: 1;
+            max-width: 160px;
+            padding: 0;
+            border-radius: 0;
+            border: none;
+            background: none;
+            transition: filter 0.2s, transform 0.15s;
+            cursor: pointer;
+        }
+
+        /* The SVG bin drawing */
+        .bin-svg-wrap {
+            width: 110px;
+            height: 120px;
+            position: relative;
+            transition: transform 0.15s;
+        }
+        .bin-svg-wrap svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+        }
+
+        .bin .bin-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.85);
+            margin-top: 5px;
+        }
+
+        .bin.highlight .bin-svg-wrap {
+            transform: scale(1.08);
+            filter: drop-shadow(0 0 14px rgba(200, 255, 0, 0.7));
+        }
+        .bin.highlight .bin-label {
+            color: var(--accent);
+        }
+
+        .bin.correct-flash .bin-svg-wrap {
+            filter: drop-shadow(0 0 18px rgba(74, 222, 128, 0.8));
+        }
+        .bin.wrong-flash .bin-svg-wrap {
+            filter: drop-shadow(0 0 18px rgba(248, 113, 113, 0.8));
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        /* SCORE POPUP */
+        .score-popup {
+            position: absolute;
+            font-family: 'Syne', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            pointer-events: none;
+            z-index: 300;
+            animation: floatUp 0.8s ease-out forwards;
+        }
+        .score-popup.positive { color: var(--green); }
+        .score-popup.negative { color: var(--red); }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            .falling-item { width: 64px; height: 64px; }
+            .bin-svg-wrap { width: 80px; height: 88px; }
+            .card h1 { font-size: 2.2rem; }
+            .card { padding: 32px 24px; }
+            #scoreDisplay, #timerDisplay { font-size: 1.1rem; }
+        }
+
+        /* ── BOTTOM NAV ── */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            z-index: 2000;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 0 max(env(safe-area-inset-bottom), 12px);
+            background: rgba(6,6,6,0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            transition: transform 0.3s ease;
+        }
+        .bottom-nav.hidden-nav { transform: translateY(100%); }
+        .nav-item {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 4px;
+            padding: 4px 18px;
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+            position: relative;
+            transition: color 0.2s;
+        }
+        .nav-item.active { color: #c8ff00; }
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -10px; left: 50%; transform: translateX(-50%);
+            width: 4px; height: 4px;
+            border-radius: 50%;
+            background: #c8ff00;
+        }
+        .nav-icon-wrap {
+            width: 40px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .nav-item.active .nav-icon-wrap { background: rgba(200,255,0,0.1); }
+        .nav-label {
+            font-family: 'Syne Mono', monospace;
+            font-size: 0.48rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== START SCREEN ===== -->
+    <div id="startScreen" class="overlay">
+        <div class="card">
+            <h1>Sort It!</h1>
+            <p>Drag the falling garbage into the correct bin.<br>Be quick and accurate!</p>
+            <p id="bestScoreStart" style="font-family:'Syne Mono',monospace;font-size:0.9rem;color:var(--accent);margin-bottom:8px;"></p>
+            <div class="instructions">
+                <div class="inst-item">
+                    <img src="/game/asset/organictrash.png" alt="Organic">
+                    <span>Organic</span>
+                </div>
+                <div class="inst-item">
+                    <img src="/game/asset/papertrash.png" alt="Paper">
+                    <span>Paper</span>
+                </div>
+                <div class="inst-item">
+                    <img src="/game/asset/wastetrash.png" alt="Waste">
+                    <span>Waste</span>
+                </div>
+            </div>
+            <p style="font-size:0.9rem; margin-bottom:16px;">
+                &#x2705; Correct bin = <strong style="color:var(--green)">+100</strong> &nbsp;
+                &#x274C; Wrong bin = <strong style="color:var(--red)">&minus;50</strong>
+            </p>
+            <button id="startBtn" class="btn btn-primary" disabled>Loading...</button>
+        </div>
+
+        <div class="leaderboard-panel">
+            <div class="lb-header">
+                <div class="lb-title">🏆 Leaderboard</div>
+                <div class="lb-subtitle">Top 10</div>
+            </div>
+            <div class="lb-body">
+                <div id="lbList"><div class="lb-empty">Loading...</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== GAME SCREEN ===== -->
+    <div id="gameScreen" class="hidden">
+        <div id="hud">
+            <div>
+                <div id="scoreDisplay">SCORE: 0</div>
+                <div id="bestDisplay"></div>
+            </div>
+            <div id="timerDisplay">1:00</div>
+        </div>
+        <div id="gameArea"></div>
+        <div id="binsArea">
+            <!-- ORGANIC BIN - Green -->
+            <div class="bin" data-category="organics">
+                <div class="bin-svg-wrap">
+                    <svg viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Lid -->
+                        <rect x="8" y="6" width="84" height="14" rx="6" fill="#166534"/>
+                        <rect x="12" y="3" width="76" height="10" rx="5" fill="#15803d"/>
+                        <!-- Handle on lid -->
+                        <rect x="38" y="0" width="24" height="7" rx="3.5" fill="#14532d"/>
+                        <!-- Body -->
+                        <path d="M14 20 L10 105 Q10 108 14 108 L86 108 Q90 108 90 105 L86 20 Z" fill="#16a34a"/>
+                        <!-- Body shading -->
+                        <path d="M14 20 L10 105 Q10 108 14 108 L30 108 L26 20 Z" fill="#15803d" opacity="0.5"/>
+                        <!-- Recycling / leaf icon on bin -->
+                        <text x="50" y="72" text-anchor="middle" font-size="28" fill="rgba(255,255,255,0.35)">🌿</text>
+                        <!-- Vertical ridges for texture -->
+                        <line x1="38" y1="22" x2="36" y2="106" stroke="rgba(0,0,0,0.12)" stroke-width="2"/>
+                        <line x1="52" y1="22" x2="50" y2="106" stroke="rgba(0,0,0,0.12)" stroke-width="2"/>
+                        <line x1="66" y1="22" x2="64" y2="106" stroke="rgba(0,0,0,0.12)" stroke-width="2"/>
+                    </svg>
+                </div>
+                <span class="bin-label">Organic</span>
+            </div>
+
+            <!-- PAPER BIN - Blue -->
+            <div class="bin" data-category="paper">
+                <div class="bin-svg-wrap">
+                    <svg viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Lid -->
+                        <rect x="8" y="6" width="84" height="14" rx="6" fill="#1e3a5f"/>
+                        <rect x="12" y="3" width="76" height="10" rx="5" fill="#1d4ed8"/>
+                        <!-- Handle on lid -->
+                        <rect x="38" y="0" width="24" height="7" rx="3.5" fill="#1e3a8a"/>
+                        <!-- Body -->
+                        <path d="M14 20 L10 105 Q10 108 14 108 L86 108 Q90 108 90 105 L86 20 Z" fill="#2563eb"/>
+                        <!-- Body shading -->
+                        <path d="M14 20 L10 105 Q10 108 14 108 L30 108 L26 20 Z" fill="#1d4ed8" opacity="0.5"/>
+                        <!-- Paper icon -->
+                        <text x="50" y="72" text-anchor="middle" font-size="26" fill="rgba(255,255,255,0.35)">📄</text>
+                        <!-- Vertical ridges -->
+                        <line x1="38" y1="22" x2="36" y2="106" stroke="rgba(0,0,0,0.12)" stroke-width="2"/>
+                        <line x1="52" y1="22" x2="50" y2="106" stroke="rgba(0,0,0,0.12)" stroke-width="2"/>
+                        <line x1="66" y1="22" x2="64" y2="106" stroke="rgba(0,0,0,0.12)" stroke-width="2"/>
+                    </svg>
+                </div>
+                <span class="bin-label">Paper</span>
+            </div>
+
+            <!-- WASTE BIN - Dark grey/black -->
+            <div class="bin" data-category="waste">
+                <div class="bin-svg-wrap">
+                    <svg viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Lid -->
+                        <rect x="8" y="6" width="84" height="14" rx="6" fill="#1c1c1c"/>
+                        <rect x="12" y="3" width="76" height="10" rx="5" fill="#374151"/>
+                        <!-- Handle on lid -->
+                        <rect x="38" y="0" width="24" height="7" rx="3.5" fill="#111827"/>
+                        <!-- Body -->
+                        <path d="M14 20 L10 105 Q10 108 14 108 L86 108 Q90 108 90 105 L86 20 Z" fill="#4b5563"/>
+                        <!-- Body shading -->
+                        <path d="M14 20 L10 105 Q10 108 14 108 L30 108 L26 20 Z" fill="#374151" opacity="0.5"/>
+                        <!-- Waste icon -->
+                        <text x="50" y="72" text-anchor="middle" font-size="26" fill="rgba(255,255,255,0.3)">🗑️</text>
+                        <!-- Vertical ridges -->
+                        <line x1="38" y1="22" x2="36" y2="106" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+                        <line x1="52" y1="22" x2="50" y2="106" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+                        <line x1="66" y1="22" x2="64" y2="106" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+                    </svg>
+                </div>
+                <span class="bin-label">Waste</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== GAME OVER SCREEN ===== -->
+    <div id="gameOverScreen" class="overlay hidden">
+        <div class="card">
+            <h2>Game Over!</h2>
+            <div id="newRecordBadge" class="new-record-badge" style="display:none;">🏆 New Record!</div>
+            <div class="final-score" id="finalScore">0</div>
+            <div class="score-msg" id="scoreMsg">Good job!</div>
+            <p id="bestScoreEnd" style="font-family:'Syne Mono',monospace;font-size:0.85rem;color:rgba(255,255,255,0.5);margin-bottom:16px;"></p>
+            <div>
+                <button id="restartBtn" class="btn btn-primary">Play Again</button>
+                <button id="homeBtn" class="btn btn-secondary">Back to Home</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── BOTTOM NAV ── -->
+    <nav class="bottom-nav" id="bottomNav">
+        <a href="/learning" class="nav-item" style="text-decoration:none;">
+            <div class="nav-icon-wrap">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Learning</span>
+        </a>
+        <a href="/" class="nav-item" style="text-decoration:none;">
+            <div class="nav-icon-wrap">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                </svg>
+            </div>
+            <span class="nav-label">Camera</span>
+        </a>
+        <a href="/practice" class="nav-item" style="text-decoration:none;">
+            <div class="nav-icon-wrap">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"/>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Practice</span>
+        </a>
+        <a href="/game" class="nav-item active" style="text-decoration:none;">
+            <div class="nav-icon-wrap">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                    <path d="M4 22h16"/>
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Game</span>
+        </a>
+    </nav>
+
+    <script>
+    (function() {
+        const authToken = localStorage.getItem('bb_token');
+        if (!authToken) { window.location.replace('/login'); return; }
+
+        // Check if token is expired — if so, force re-login to get fresh token
+        try {
+            const payload = JSON.parse(atob(authToken.split('.')[1]));
+            if (payload.exp * 1000 < Date.now()) {
+                localStorage.removeItem('bb_token');
+                window.location.replace('/login');
+                return;
+            }
+        } catch(e) {
+            localStorage.removeItem('bb_token');
+            window.location.replace('/login');
+            return;
+        }
+
+        // ===== ELEMENTS =====
+        const startScreen = document.getElementById('startScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const homeBtn = document.getElementById('homeBtn');
+        const bottomNav = document.getElementById('bottomNav');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const bestDisplay = document.getElementById('bestDisplay');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const gameArea = document.getElementById('gameArea');
+        const finalScoreEl = document.getElementById('finalScore');
+        const scoreMsgEl = document.getElementById('scoreMsg');
+        const bestScoreStart = document.getElementById('bestScoreStart');
+        const bestScoreEnd = document.getElementById('bestScoreEnd');
+        const newRecordBadge = document.getElementById('newRecordBadge');
+        const bins = document.querySelectorAll('.bin');
+        const lbList = document.getElementById('lbList');
+
+        // ===== LEADERBOARD =====
+        function loadLeaderboard() {
+            fetch('/game/leaderboard')
+                .then(r => r.ok ? r.json() : null)
+                .then(data => {
+                    if (!data || !data.leaderboard.length) {
+                        lbList.innerHTML = '<div class="lb-empty">No scores yet. Be the first!</div>';
+                        return;
+                    }
+                    lbList.innerHTML = data.leaderboard.map((entry, i) => {
+                        const topClass = i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : '';
+                        const rankLabel = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : null;
+                        const isMe = entry.username === currentUser;
+                        const rankHtml = rankLabel
+                            ? `<span class="lb-rank">${rankLabel}</span>`
+                            : `<span class="lb-rank num">${i + 1}</span>`;
+                        const divider = i === 2 ? '<div class="lb-divider"></div>' : '';
+                        return `<div class="lb-row${topClass}${isMe ? ' me' : ''}">
+                            ${rankHtml}
+                            <div class="lb-avatar">${entry.username.charAt(0)}</div>
+                            <span class="lb-name">${entry.username}</span>
+                            <span class="lb-score">${entry.score}</span>
+                        </div>${divider}`;
+                    }).join('');
+                })
+                .catch(() => {
+                    lbList.innerHTML = '<div class="lb-empty">Could not load.</div>';
+                });
+        }
+        loadLeaderboard();
+
+
+        // ===== CURRENT USER (decoded from JWT) =====
+        const currentUser = JSON.parse(atob(authToken.split('.')[1])).sub;
+        const bestScoreKey = 'game_best_score_' + currentUser;
+
+        // ===== STATE =====
+        let allItems = [];
+        let bestScore = 0;
+
+        function authHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + authToken
+            };
+        }
+
+        function updateBestDisplays() {
+            const label = '🏆 BEST: ' + bestScore;
+            bestScoreStart.textContent = label;
+            bestDisplay.textContent = label;
+        }
+
+        // ===== LOAD BEST SCORE (localStorage first, then sync from server) =====
+        bestScore = parseInt(localStorage.getItem(bestScoreKey) || '0');
+        updateBestDisplays();
+        fetch('/game/score', { headers: authHeaders() })
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data) return;
+                const serverBest = data.best_score || 0;
+                if (serverBest > bestScore) {
+                    bestScore = serverBest;
+                    localStorage.setItem(bestScoreKey, bestScore);
+                    updateBestDisplays();
+                }
+            })
+            .catch(() => {});
+        let score = 0;
+        let timeLeft = 60;
+        let gameRunning = false;
+        let animFrameId = null;
+        let spawnTimer = null;
+        let countdownTimer = null;
+        let fallingItems = [];
+        let baseFallSpeed = 1.5;
+        let spawnDelay = 2000;
+        let isDragging = false;
+        let dragItem = null;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+        const MAX_ITEMS = 6;
+
+        // ===== LOAD ITEMS =====
+        fetch('/game/api/items')
+            .then(r => r.json())
+            .then(data => {
+                allItems = data.items;
+                // Preload first batch of images
+                const preloadCount = Math.min(30, allItems.length);
+                for (let i = 0; i < preloadCount; i++) {
+                    const img = new Image();
+                    img.src = allItems[i].url;
+                }
+                startBtn.textContent = 'Start Game';
+                startBtn.disabled = false;
+            })
+            .catch(() => {
+                startBtn.textContent = 'Error loading';
+            });
+
+        // ===== AUDIO =====
+        const correctSound = new Audio('/game/asset/correctsound.mp3');
+        const wrongSound = new Audio('/game/asset/wrongsound.mp3');
+
+        function playSound(sound) {
+            correctSound.pause();
+            correctSound.currentTime = 0;
+            wrongSound.pause();
+            wrongSound.currentTime = 0;
+            sound.play();
+        }
+
+        // ===== SCREEN TRANSITIONS =====
+        startBtn.addEventListener('click', () => {
+            startScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            startGame();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            gameOverScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            startGame();
+        });
+
+        homeBtn.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+
+        // ===== START GAME =====
+        function startGame() {
+            bottomNav.classList.add('hidden-nav');
+            score = 0;
+            timeLeft = 60;
+            baseFallSpeed = 1.5;
+            spawnDelay = 2000;
+            gameRunning = true;
+            fallingItems = [];
+            isDragging = false;
+            dragItem = null;
+
+            // Clear any leftover items
+            gameArea.innerHTML = '';
+
+            updateScore();
+            updateTimer();
+
+            // Start countdown
+            countdownTimer = setInterval(() => {
+                timeLeft--;
+                updateTimer();
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+                // Difficulty scaling every 10 seconds
+                if (timeLeft > 0 && timeLeft % 10 === 0) {
+                    updateDifficulty();
+                }
+            }, 1000);
+
+            // Start spawning
+            startSpawning();
+
+            // Start animation loop
+            animFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        // ===== DIFFICULTY =====
+        function updateDifficulty() {
+            const elapsed = 60 - timeLeft;
+            const tier = Math.floor(elapsed / 10);
+            baseFallSpeed = 1.5 + tier * 0.3;
+            spawnDelay = Math.max(800, 2000 - tier * 200);
+            startSpawning(); // restart with new interval
+        }
+
+        function startSpawning() {
+            if (spawnTimer) clearInterval(spawnTimer);
+            spawnTimer = setInterval(spawnItem, spawnDelay);
+        }
+
+        // ===== SPAWN =====
+        function spawnItem() {
+            if (!gameRunning) return;
+            if (fallingItems.length >= MAX_ITEMS) return;
+
+            const itemData = allItems[Math.floor(Math.random() * allItems.length)];
+            const areaRect = gameArea.getBoundingClientRect();
+            const itemSize = window.innerWidth <= 480 ? 64 : 80;
+
+            const el = document.createElement('img');
+            el.src = itemData.url;
+            el.className = 'falling-item';
+            el.dataset.category = itemData.category;
+            el.draggable = false;
+
+            const maxX = areaRect.width - itemSize - 8;
+            const startX = Math.random() * maxX + 4;
+
+            el.style.left = startX + 'px';
+            el.style.top = '-60px';
+            el.style.width = itemSize + 'px';
+            el.style.height = itemSize + 'px';
+
+            // Attach drag listeners
+            el.addEventListener('mousedown', onDragStart);
+            el.addEventListener('touchstart', onDragStart, { passive: false });
+
+            gameArea.appendChild(el);
+            fallingItems.push({ el: el, y: -60, dragging: false, category: itemData.category });
+        }
+
+        // ===== GAME LOOP =====
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            const areaRect = gameArea.getBoundingClientRect();
+            const areaHeight = areaRect.height;
+
+            for (let i = fallingItems.length - 1; i >= 0; i--) {
+                const item = fallingItems[i];
+                if (item.dragging) continue;
+
+                item.y += baseFallSpeed;
+                item.el.style.top = item.y + 'px';
+
+                // Fell off bottom - no penalty, just remove
+                if (item.y > areaHeight + 10) {
+                    removeItem(i);
+                }
+            }
+
+            animFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function removeItem(index) {
+            const item = fallingItems[index];
+            if (item.el.parentNode) item.el.parentNode.removeChild(item.el);
+            fallingItems.splice(index, 1);
+        }
+
+        // ===== DRAG & DROP =====
+        function onDragStart(e) {
+            if (!gameRunning || isDragging) return;
+            e.preventDefault();
+
+            const el = e.currentTarget;
+            const touch = e.touches ? e.touches[0] : e;
+            const rect = el.getBoundingClientRect();
+            const areaRect = gameArea.getBoundingClientRect();
+
+            dragOffsetX = touch.clientX - rect.left;
+            dragOffsetY = touch.clientY - rect.top;
+
+            // Find the falling item data
+            dragItem = fallingItems.find(fi => fi.el === el);
+            if (!dragItem) return;
+
+            dragItem.dragging = true;
+            isDragging = true;
+            el.classList.add('dragging');
+
+            document.addEventListener('mousemove', onDragMove);
+            document.addEventListener('mouseup', onDragEnd);
+            document.addEventListener('touchmove', onDragMove, { passive: false });
+            document.addEventListener('touchend', onDragEnd);
+        }
+
+        function onDragMove(e) {
+            if (!dragItem) return;
+            e.preventDefault();
+
+            const touch = e.touches ? e.touches[0] : e;
+            const areaRect = gameArea.getBoundingClientRect();
+
+            let newX = touch.clientX - areaRect.left - dragOffsetX;
+            let newY = touch.clientY - areaRect.top - dragOffsetY;
+
+            // Clamp within game area
+            const itemSize = parseInt(dragItem.el.style.width);
+            newX = Math.max(0, Math.min(newX, areaRect.width - itemSize));
+            newY = Math.max(-20, Math.min(newY, areaRect.height + 40));
+
+            dragItem.el.style.left = newX + 'px';
+            dragItem.el.style.top = newY + 'px';
+            dragItem.y = newY;
+
+            // Highlight bins
+            const itemCenterX = touch.clientX;
+            const itemCenterY = touch.clientY;
+
+            bins.forEach(bin => {
+                const br = bin.getBoundingClientRect();
+                if (itemCenterX >= br.left && itemCenterX <= br.right &&
+                    itemCenterY >= br.top && itemCenterY <= br.bottom) {
+                    bin.classList.add('highlight');
+                } else {
+                    bin.classList.remove('highlight');
+                }
+            });
+        }
+
+        function onDragEnd(e) {
+            if (!dragItem) return;
+
+            document.removeEventListener('mousemove', onDragMove);
+            document.removeEventListener('mouseup', onDragEnd);
+            document.removeEventListener('touchmove', onDragMove);
+            document.removeEventListener('touchend', onDragEnd);
+
+            const el = dragItem.el;
+            el.classList.remove('dragging');
+
+            // Get drop position
+            let dropX, dropY;
+            if (e.changedTouches) {
+                dropX = e.changedTouches[0].clientX;
+                dropY = e.changedTouches[0].clientY;
+            } else {
+                dropX = e.clientX;
+                dropY = e.clientY;
+            }
+
+            // Check which bin
+            let droppedBin = null;
+            bins.forEach(bin => {
+                bin.classList.remove('highlight');
+                const br = bin.getBoundingClientRect();
+                if (dropX >= br.left && dropX <= br.right &&
+                    dropY >= br.top && dropY <= br.bottom) {
+                    droppedBin = bin;
+                }
+            });
+
+            const itemIndex = fallingItems.indexOf(dragItem);
+
+            if (droppedBin) {
+                const binCat = droppedBin.dataset.category;
+                const itemCat = dragItem.category;
+
+                if (binCat === itemCat) {
+                    // Correct!
+                    score += 100;
+                    showScorePopup(el, '+100', true);
+                    flashBin(droppedBin, 'correct-flash');
+                    playSound(correctSound);
+                } else {
+                    // Wrong
+                    score = Math.max(0, score - 50);
+                    showScorePopup(el, '-50', false);
+                    flashBin(droppedBin, 'wrong-flash');
+                    playSound(wrongSound);
+                }
+
+                updateScore();
+                if (itemIndex >= 0) removeItem(itemIndex);
+            } else {
+                // Not on a bin - resume falling
+                dragItem.dragging = false;
+            }
+
+            isDragging = false;
+            dragItem = null;
+        }
+
+        // ===== VISUAL FEEDBACK =====
+        function showScorePopup(el, text, positive) {
+            const popup = document.createElement('div');
+            popup.className = 'score-popup ' + (positive ? 'positive' : 'negative');
+            popup.textContent = text;
+
+            const rect = el.getBoundingClientRect();
+            const areaRect = gameArea.getBoundingClientRect();
+            popup.style.left = (rect.left - areaRect.left + rect.width / 2 - 20) + 'px';
+            popup.style.top = (rect.top - areaRect.top) + 'px';
+
+            gameArea.appendChild(popup);
+            setTimeout(() => {
+                if (popup.parentNode) popup.parentNode.removeChild(popup);
+            }, 800);
+        }
+
+        function flashBin(bin, className) {
+            bin.classList.add(className);
+            setTimeout(() => bin.classList.remove(className), 400);
+        }
+
+        // ===== HUD =====
+        function updateScore() {
+            scoreDisplay.textContent = 'SCORE: ' + score;
+        }
+
+        function updateTimer() {
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            timerDisplay.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+
+            if (timeLeft <= 10) {
+                timerDisplay.classList.add('urgent');
+            } else {
+                timerDisplay.classList.remove('urgent');
+            }
+        }
+
+        // ===== END GAME =====
+        function endGame() {
+            gameRunning = false;
+
+            if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+            if (spawnTimer) { clearInterval(spawnTimer); spawnTimer = null; }
+            if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+
+            // Clean up drag state
+            document.removeEventListener('mousemove', onDragMove);
+            document.removeEventListener('mouseup', onDragEnd);
+            document.removeEventListener('touchmove', onDragMove);
+            document.removeEventListener('touchend', onDragEnd);
+            isDragging = false;
+            dragItem = null;
+
+            // Clear items
+            fallingItems = [];
+            gameArea.innerHTML = '';
+
+            // Show game over
+            finalScoreEl.textContent = score;
+            newRecordBadge.style.display = 'none';
+
+            let msg;
+            if (score >= 2500) msg = 'Recycling Champion! \u{1F3C6}';
+            else if (score >= 1500) msg = 'Amazing Sorter! \u{1F31F}';
+            else if (score >= 500) msg = 'Good Job! \u{1F44D}';
+            else msg = 'Keep Practicing! \u{1F4AA}';
+            scoreMsgEl.textContent = msg;
+
+            // Update best score locally right away
+            if (score > bestScore) {
+                bestScore = score;
+                localStorage.setItem(bestScoreKey, bestScore);
+                newRecordBadge.style.display = 'inline-block';
+                updateBestDisplays();
+                bestScoreEnd.textContent = '';
+            } else {
+                bestScoreEnd.textContent = '🏆 BEST: ' + bestScore;
+            }
+
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+            bottomNav.classList.remove('hidden-nav');
+
+            // Save to server, then refresh leaderboard
+            if (authToken) {
+                fetch('/game/score', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ score: score })
+                })
+                .then(() => loadLeaderboard())
+                .catch(() => loadLeaderboard());
+            } else {
+                loadLeaderboard();
+            }
+        }
+
+    })();
+    </script>
+</body>
+</html>

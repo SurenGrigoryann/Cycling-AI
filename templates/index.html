@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!---->>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Bin Buddy</title>
@@ -223,6 +224,7 @@
     }
 
     .app-name-wrap {
+      position: absolute; left: 50%; transform: translateX(-50%);
       display: flex; align-items: center; gap: 8px;
     }
     .app-name-icon {
@@ -232,9 +234,9 @@
       display: flex; align-items: center; justify-content: center;
     }
     .app-name {
-      font-size: 1rem;
+      font-size: 1.5rem;
       font-weight: 800;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--accent);
     }
@@ -577,6 +579,10 @@
 
   <!-- ── TOPBAR ── -->
   <div class="topbar">
+    <div style="display:flex;align-items:center;gap:8px;visibility:hidden;">
+      <div class="app-name-icon"></div>
+      <div class="app-name">Bin Buddy</div>
+    </div>
     <div class="app-name-wrap">
       <div class="app-name-icon">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -685,7 +691,7 @@
       </div>
       <span class="nav-label">Camera</span>
     </div>
-    <div class="nav-item">
+    <a href="/practice" class="nav-item" style="text-decoration:none;">
       <div class="nav-icon-wrap">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 20h9"/>
@@ -693,8 +699,8 @@
         </svg>
       </div>
       <span class="nav-label">Practice</span>
-    </div>
-    <div class="nav-item">
+    </a>
+    <a href="/game" class="nav-item" style="text-decoration:none;">
       <div class="nav-icon-wrap">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
@@ -706,14 +712,26 @@
         </svg>
       </div>
       <span class="nav-label">Game</span>
-    </div>
+    </a>
   </nav>
 
   <div class="toast" id="toast"></div>
 
   <script>
     const authToken = localStorage.getItem('bb_token');
-    if (!authToken) window.location.replace('/login');
+    if (!authToken) { window.location.replace('/login'); }
+    else {
+        try {
+            const _p = JSON.parse(atob(authToken.split('.')[1]));
+            if (_p.exp * 1000 < Date.now()) {
+                localStorage.removeItem('bb_token');
+                window.location.replace('/login');
+            }
+        } catch(e) {
+            localStorage.removeItem('bb_token');
+            window.location.replace('/login');
+        }
+    }
 
     function logout() {
       localStorage.removeItem('bb_token');
@@ -843,7 +861,7 @@
       });
 
       const isCorrect = chosen === correctBin;
-      playBuddyAnimation(isCorrect ? 'happy' : 'sad');
+      playBuddyAnimation(isCorrect ? 'happy' : 'sad', { loop: true });
       verdict.textContent = isCorrect ? '✓ Correct!' : `✗ It's ${correctBin}`;
       verdict.className = 'verdict ' + (isCorrect ? 'correct' : 'wrong');
       explainText.textContent = explanationText;
@@ -851,6 +869,7 @@
     }
 
     function retake() {
+      dismissBuddyAnimation();
       correctBin = null;
       explanationText = null;
       snapshot.classList.remove('visible');

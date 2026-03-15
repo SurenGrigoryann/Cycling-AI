@@ -27,17 +27,17 @@
  position: fixed; top: 0; left: 0; right: 0;
  padding: max(env(safe-area-inset-top), 16px) 20px 14px;
  z-index: 20; display: flex; align-items: center;
- justify-content: space-between;
+ justify-content: center; flex-direction: column; gap: 4px;
  background: rgba(8,8,8,0.92);
  backdrop-filter: blur(12px);
  border-bottom: 1px solid var(--glass-border);
  }
- .app-name { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); }
+ .app-name { font-size: 1.5rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
  .progress-label { font-family: 'Syne Mono', monospace; font-size: 0.58rem; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; }
 
  /* SCROLL */
  .scroll-wrap {
- position: fixed; top: 58px; bottom: 62px;
+ position: fixed; top: 78px; bottom: 62px;
  left: 0; right: 0;
  overflow-y: scroll; scrollbar-width: none;
  }
@@ -45,7 +45,7 @@
 
  /* SPINE */
  .spine {
- position: fixed; top: 58px; bottom: 62px;
+ position: fixed; top: 78px; bottom: 62px;
  left: 50%; width: 2px;
  transform: translateX(-50%);
  pointer-events: none; z-index: 1;
@@ -54,7 +54,7 @@
 
  /* BUILDING COLUMNS */
  .building-frame {
- position: fixed; top: 58px; bottom: 62px;
+ position: fixed; top: 78px; bottom: 62px;
  left: 16px; right: 16px;
  pointer-events: none; z-index: 1;
  }
@@ -263,7 +263,7 @@
  </svg>
  <span class="nav-label">Practice</span>
  </a>
- <a href="#" class="nav-item" style="text-decoration:none;">
+ <a href="/game" class="nav-item" style="text-decoration:none;">
  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
  <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
  <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
@@ -327,6 +327,6 @@
  document.getElementById('progressLabel').textContent = `${completed} / 3 complete`;
  });
  </script>
-
+<!---->>
 </body>
 </html>

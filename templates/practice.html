@@ -32,13 +32,13 @@
  background: rgba(8,8,8,0.92); backdrop-filter: blur(12px);
  border-bottom: 1px solid var(--glass-border);
  }
- .topbar-left { display: flex; align-items: center; gap: 12px; }
+ .topbar-left { flex: 1; display: flex; align-items: center; justify-content: center; gap: 12px; }
  .back-btn {
  background: none; border: none; color: var(--muted);
  cursor: pointer; padding: 4px; display: flex; align-items: center;
  display: none;
  }
- .app-name { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); }
+ .app-name { font-size: 1.5rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
  .progress-bar-wrap {
  flex: 1; height: 6px; background: rgba(255,255,255,0.08);
  border-radius: 3px; overflow: hidden; display: none; max-width: 160px;
@@ -57,14 +57,14 @@
  .screen.hidden { opacity: 0; pointer-events: none; transform: translateY(16px); }
 
  /* ── TOPIC SELECTION ── */
- #topicScreen { padding: 24px 20px 20px; }
+ #topicScreen { padding: 20px 20px 16px; }
  .section-tag {
  font-family: 'Syne Mono', monospace; font-size: 0.5rem;
  letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted);
- margin-bottom: 6px;
+ margin-bottom: 4px; text-align: center;
  }
- .section-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
- .section-sub { font-size: 0.82rem; color: rgba(245,245,245,0.45); margin-bottom: 28px; line-height: 1.5; }
+ .section-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; text-align: center; }
+ .section-sub { font-size: 0.82rem; color: rgba(245,245,245,0.45); margin-bottom: 18px; line-height: 1.5; text-align: center; }
 
  .topic-card {
  width: 100%; border-radius: 20px;
@@ -197,10 +197,12 @@
 <body>
 
  <div class="topbar">
- <div class="topbar-left">
- <button class="back-btn" id="backBtn" onclick="goBack()">
+ <div style="width:28px;flex-shrink:0;">
+ <button class="back-btn" id="backBtn" onclick="goBack()" style="display:none;">
  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>
  </button>
+ </div>
+ <div class="topbar-left">
  <div class="app-name" id="topbarTitle">Practice</div>
  </div>
  <div style="display:flex;align-items:center;gap:10px;">
@@ -305,7 +307,7 @@
  </svg>
  <span class="nav-label">Practice</span>
  </a>
- <a href="#" class="nav-item" style="text-decoration:none;">
+ <a href="/game" class="nav-item" style="text-decoration:none;">
  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
  <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
  <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
@@ -483,7 +485,7 @@
  const correct = el.dataset.correct === 'true';
  const explanation = el.dataset.explain;
  answered = true;
- playBuddyAnimation(correct ? 'happy' : 'sad', { loop: true });
+ playBuddyAnimation(correct ? 'happy' : 'sad', { loop: true, position: 'bottom-right' });
  if (correct) score++;
  el.parentElement.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
  el.classList.add(correct ? 'correct' : 'wrong');
@@ -563,3 +565,4 @@
 <script src="/static/buddy-animation.js"></script>
 </body>
 </html>
+<!---->>
