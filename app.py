@@ -19,7 +19,7 @@ app.register_blueprint(practice_bp)
 app.register_blueprint(game_bp)
 
 app.config["JWT_SECRET_KEY"] = "x7k#mP9$qL2@nR5&vT8*wY3"
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 60 * 60 * 24 * 30  # 30 days
 
 jwt = JWTManager(app)
 limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day"])

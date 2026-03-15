@@ -47,6 +47,147 @@
             background: rgba(10, 10, 30, 0.92);
             transition: opacity 0.4s ease;
         }
+
+        #startScreen {
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            padding: 16px;
+        }
+
+        /* ===== LEADERBOARD ===== */
+        .leaderboard-panel {
+            background: linear-gradient(160deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 0;
+            width: 300px;
+            flex-shrink: 0;
+            overflow: hidden;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+        }
+        .lb-header {
+            background: linear-gradient(135deg, rgba(200,255,0,0.12), rgba(200,255,0,0.04));
+            border-bottom: 1px solid rgba(200,255,0,0.15);
+            padding: 20px 22px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .lb-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: -0.3px;
+        }
+        .lb-subtitle {
+            font-family: 'Syne Mono', monospace;
+            font-size: 0.55rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.3);
+        }
+        .lb-body { padding: 12px 14px 16px; }
+        .lb-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 10px;
+            border-radius: 12px;
+            margin-bottom: 3px;
+            transition: background 0.2s;
+            position: relative;
+        }
+        .lb-row:hover { background: rgba(255,255,255,0.05); }
+        .lb-row.top1 {
+            background: linear-gradient(90deg, rgba(255,215,0,0.12), rgba(255,215,0,0.04));
+            border: 1px solid rgba(255,215,0,0.2);
+        }
+        .lb-row.top2 {
+            background: linear-gradient(90deg, rgba(192,192,192,0.1), rgba(192,192,192,0.03));
+            border: 1px solid rgba(192,192,192,0.15);
+        }
+        .lb-row.top3 {
+            background: linear-gradient(90deg, rgba(205,127,50,0.1), rgba(205,127,50,0.03));
+            border: 1px solid rgba(205,127,50,0.15);
+        }
+        .lb-row.me {
+            background: linear-gradient(90deg, rgba(200,255,0,0.1), rgba(200,255,0,0.03));
+            border: 1px solid rgba(200,255,0,0.25);
+        }
+        .lb-rank {
+            font-family: 'Syne Mono', monospace;
+            font-size: 1rem;
+            width: 28px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .lb-rank.num {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.25);
+        }
+        .lb-avatar {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.5);
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+        .lb-row.top1 .lb-avatar { background: rgba(255,215,0,0.15); color: #ffd700; }
+        .lb-row.top2 .lb-avatar { background: rgba(192,192,192,0.15); color: #c0c0c0; }
+        .lb-row.top3 .lb-avatar { background: rgba(205,127,50,0.15); color: #cd7f32; }
+        .lb-row.me   .lb-avatar { background: rgba(200,255,0,0.15); color: var(--accent); }
+        .lb-name {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text);
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .lb-row.me .lb-name::after {
+            content: ' (you)';
+            font-size: 0.65rem;
+            color: var(--accent);
+            font-weight: 400;
+        }
+        .lb-score {
+            font-family: 'Syne Mono', monospace;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.06);
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        .lb-row.top1 .lb-score { color: #ffd700; background: rgba(255,215,0,0.1); }
+        .lb-row.me   .lb-score { color: var(--accent); background: rgba(200,255,0,0.1); }
+        .lb-empty {
+            text-align: center;
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.25);
+            padding: 32px 0;
+            line-height: 1.6;
+        }
+        .lb-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.06);
+            margin: 6px 0;
+        }
+        @media (max-width: 700px) {
+            #startScreen { flex-direction: column; gap: 16px; overflow-y: auto; padding-bottom: 80px; }
+            .leaderboard-panel { width: 90%; max-width: 360px; }
+        }
         .overlay.hidden {
             opacity: 0;
             pointer-events: none;
@@ -338,6 +479,54 @@
             .card { padding: 32px 24px; }
             #scoreDisplay, #timerDisplay { font-size: 1.1rem; }
         }
+
+        /* ── BOTTOM NAV ── */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            z-index: 2000;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 0 max(env(safe-area-inset-bottom), 12px);
+            background: rgba(6,6,6,0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            transition: transform 0.3s ease;
+        }
+        .bottom-nav.hidden-nav { transform: translateY(100%); }
+        .nav-item {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 4px;
+            padding: 4px 18px;
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+            position: relative;
+            transition: color 0.2s;
+        }
+        .nav-item.active { color: #c8ff00; }
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -10px; left: 50%; transform: translateX(-50%);
+            width: 4px; height: 4px;
+            border-radius: 50%;
+            background: #c8ff00;
+        }
+        .nav-icon-wrap {
+            width: 40px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .nav-item.active .nav-icon-wrap { background: rgba(200,255,0,0.1); }
+        .nav-label {
+            font-family: 'Syne Mono', monospace;
+            font-size: 0.48rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
@@ -367,6 +556,16 @@
                 &#x274C; Wrong bin = <strong style="color:var(--red)">&minus;50</strong>
             </p>
             <button id="startBtn" class="btn btn-primary" disabled>Loading...</button>
+        </div>
+
+        <div class="leaderboard-panel">
+            <div class="lb-header">
+                <div class="lb-title">🏆 Leaderboard</div>
+                <div class="lb-subtitle">Top 10</div>
+            </div>
+            <div class="lb-body">
+                <div id="lbList"><div class="lb-empty">Loading...</div></div>
+            </div>
         </div>
     </div>
 
@@ -411,9 +610,68 @@
         </div>
     </div>
 
+    <!-- ── BOTTOM NAV ── -->
+    <nav class="bottom-nav" id="bottomNav">
+        <a href="/learning" class="nav-item" style="text-decoration:none;">
+            <div class="nav-icon-wrap">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Learning</span>
+        </a>
+        <a href="/" class="nav-item" style="text-decoration:none;">
+            <div class="nav-icon-wrap">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                </svg>
+            </div>
+            <span class="nav-label">Camera</span>
+        </a>
+        <a href="/practice" class="nav-item" style="text-decoration:none;">
+            <div class="nav-icon-wrap">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"/>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Practice</span>
+        </a>
+        <a href="/game" class="nav-item active" style="text-decoration:none;">
+            <div class="nav-icon-wrap">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                    <path d="M4 22h16"/>
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>
+                </svg>
+            </div>
+            <span class="nav-label">Game</span>
+        </a>
+    </nav>
+
     <script>
     (function() {
         const authToken = localStorage.getItem('bb_token');
+        if (!authToken) { window.location.replace('/login'); return; }
+
+        // Check if token is expired — if so, force re-login to get fresh token
+        try {
+            const payload = JSON.parse(atob(authToken.split('.')[1]));
+            if (payload.exp * 1000 < Date.now()) {
+                localStorage.removeItem('bb_token');
+                window.location.replace('/login');
+                return;
+            }
+        } catch(e) {
+            localStorage.removeItem('bb_token');
+            window.location.replace('/login');
+            return;
+        }
 
         // ===== ELEMENTS =====
         const startScreen = document.getElementById('startScreen');
@@ -422,6 +680,7 @@
         const startBtn = document.getElementById('startBtn');
         const restartBtn = document.getElementById('restartBtn');
         const homeBtn = document.getElementById('homeBtn');
+        const bottomNav = document.getElementById('bottomNav');
         const scoreDisplay = document.getElementById('scoreDisplay');
         const bestDisplay = document.getElementById('bestDisplay');
         const timerDisplay = document.getElementById('timerDisplay');
@@ -432,26 +691,76 @@
         const bestScoreEnd = document.getElementById('bestScoreEnd');
         const newRecordBadge = document.getElementById('newRecordBadge');
         const bins = document.querySelectorAll('.bin');
+        const lbList = document.getElementById('lbList');
+
+        // ===== LEADERBOARD =====
+        function loadLeaderboard() {
+            fetch('/game/leaderboard')
+                .then(r => r.ok ? r.json() : null)
+                .then(data => {
+                    if (!data || !data.leaderboard.length) {
+                        lbList.innerHTML = '<div class="lb-empty">No scores yet. Be the first!</div>';
+                        return;
+                    }
+                    lbList.innerHTML = data.leaderboard.map((entry, i) => {
+                        const topClass = i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : '';
+                        const rankLabel = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : null;
+                        const isMe = entry.username === currentUser;
+                        const rankHtml = rankLabel
+                            ? `<span class="lb-rank">${rankLabel}</span>`
+                            : `<span class="lb-rank num">${i + 1}</span>`;
+                        const divider = i === 2 ? '<div class="lb-divider"></div>' : '';
+                        return `<div class="lb-row${topClass}${isMe ? ' me' : ''}">
+                            ${rankHtml}
+                            <div class="lb-avatar">${entry.username.charAt(0)}</div>
+                            <span class="lb-name">${entry.username}</span>
+                            <span class="lb-score">${entry.score}</span>
+                        </div>${divider}`;
+                    }).join('');
+                })
+                .catch(() => {
+                    lbList.innerHTML = '<div class="lb-empty">Could not load.</div>';
+                });
+        }
+        loadLeaderboard();
+
+
+        // ===== CURRENT USER (decoded from JWT) =====
+        const currentUser = JSON.parse(atob(authToken.split('.')[1])).sub;
+        const bestScoreKey = 'game_best_score_' + currentUser;
 
         // ===== STATE =====
         let allItems = [];
         let bestScore = 0;
 
-        // ===== LOAD BEST SCORE =====
-        if (authToken) {
-            fetch('/game/score', {
-                headers: { 'Authorization': 'Bearer ' + authToken }
-            })
-            .then(r => r.json())
+        function authHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + authToken
+            };
+        }
+
+        function updateBestDisplays() {
+            const label = '🏆 BEST: ' + bestScore;
+            bestScoreStart.textContent = label;
+            bestDisplay.textContent = label;
+        }
+
+        // ===== LOAD BEST SCORE (localStorage first, then sync from server) =====
+        bestScore = parseInt(localStorage.getItem(bestScoreKey) || '0');
+        updateBestDisplays();
+        fetch('/game/score', { headers: authHeaders() })
+            .then(r => r.ok ? r.json() : null)
             .then(data => {
-                bestScore = data.best_score || 0;
-                if (bestScore > 0) {
-                    bestScoreStart.textContent = '🏆 Best: ' + bestScore;
-                    bestDisplay.textContent = 'BEST: ' + bestScore;
+                if (!data) return;
+                const serverBest = data.best_score || 0;
+                if (serverBest > bestScore) {
+                    bestScore = serverBest;
+                    localStorage.setItem(bestScoreKey, bestScore);
+                    updateBestDisplays();
                 }
             })
             .catch(() => {});
-        }
         let score = 0;
         let timeLeft = 60;
         let gameRunning = false;
@@ -516,6 +825,7 @@
 
         // ===== START GAME =====
         function startGame() {
+            bottomNav.classList.add('hidden-nav');
             score = 0;
             timeLeft = 60;
             baseFallSpeed = 1.5;
@@ -819,33 +1129,33 @@
             else msg = 'Keep Practicing! \u{1F4AA}';
             scoreMsgEl.textContent = msg;
 
-            // Save score & check record
-            if (authToken) {
-                fetch('/game/score', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + authToken
-                    },
-                    body: JSON.stringify({ score: score })
-                })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.is_new_record) {
-                        bestScore = score;
-                        newRecordBadge.style.display = 'inline-block';
-                        bestScoreStart.textContent = '🏆 Best: ' + bestScore;
-                        bestDisplay.textContent = 'BEST: ' + bestScore;
-                        bestScoreEnd.textContent = '';
-                    } else {
-                        bestScoreEnd.textContent = '🏆 Best: ' + bestScore;
-                    }
-                })
-                .catch(() => {});
+            // Update best score locally right away
+            if (score > bestScore) {
+                bestScore = score;
+                localStorage.setItem(bestScoreKey, bestScore);
+                newRecordBadge.style.display = 'inline-block';
+                updateBestDisplays();
+                bestScoreEnd.textContent = '';
+            } else {
+                bestScoreEnd.textContent = '🏆 BEST: ' + bestScore;
             }
 
             gameScreen.classList.add('hidden');
             gameOverScreen.classList.remove('hidden');
+            bottomNav.classList.remove('hidden-nav');
+
+            // Save to server, then refresh leaderboard
+            if (authToken) {
+                fetch('/game/score', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ score: score })
+                })
+                .then(() => loadLeaderboard())
+                .catch(() => loadLeaderboard());
+            } else {
+                loadLeaderboard();
+            }
         }
 
     })();

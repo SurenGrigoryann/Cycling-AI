@@ -714,7 +714,19 @@
 
   <script>
     const authToken = localStorage.getItem('bb_token');
-    if (!authToken) window.location.replace('/login');
+    if (!authToken) { window.location.replace('/login'); }
+    else {
+        try {
+            const _p = JSON.parse(atob(authToken.split('.')[1]));
+            if (_p.exp * 1000 < Date.now()) {
+                localStorage.removeItem('bb_token');
+                window.location.replace('/login');
+            }
+        } catch(e) {
+            localStorage.removeItem('bb_token');
+            window.location.replace('/login');
+        }
+    }
 
     function logout() {
       localStorage.removeItem('bb_token');

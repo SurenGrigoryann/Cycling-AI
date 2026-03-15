@@ -78,6 +78,15 @@ def save_score():
     conn.close()
     return jsonify({'success': True, 'is_new_record': is_new_record})
 
+@game_bp.route('/game/leaderboard')
+def leaderboard():
+    conn = get_db()
+    rows = conn.execute(
+        'SELECT username, best_score FROM game_scores ORDER BY best_score DESC LIMIT 10'
+    ).fetchall()
+    conn.close()
+    return jsonify({'leaderboard': [{'username': r['username'], 'score': r['best_score']} for r in rows]})
+
 @game_bp.route('/game/asset/<filename>')
 def serve_game_asset(filename):
     allowed = {'organictrash.png', 'papertrash.png', 'wastetrash.png', 'backgroundfinal.jpg', 'correctsound.mp3', 'wrongsound.mp3'}
