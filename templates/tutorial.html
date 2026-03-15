@@ -7,12 +7,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Syne+Mono&display=swap" rel="stylesheet"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--bg:#f5f4ef;--surface:#ffffff;--border:rgba(22,163,74,0.2);--accent:#16a34a;--text:#1a2e1e;--muted:#7a9b80;}
+    :root{--bg:#080808;--surface:#111;--border:#1e1e1e;--accent:#c8ff00;--text:#f0f0f0;--muted:#555;}
     html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Syne',sans-serif;color:var(--text);}
-
+ 
     /* overlay backdrop */
-    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;animation:fadeIn 0.3s ease;}
-
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;animation:fadeIn 0.3s ease;}
+ 
     .card{
       width:100%;max-width:420px;
       background:var(--surface);
@@ -21,7 +21,7 @@
       overflow:hidden;
       animation:slideUp 0.4s cubic-bezier(0.34,1.56,0.64,1);
     }
-
+ 
     /* step image/icon area */
     .step-visual{
       height:200px;
@@ -30,32 +30,32 @@
       position:relative;
       overflow:hidden;
     }
-
+ 
     .step-visual::after{
       content:'';position:absolute;inset:0;
       background:linear-gradient(to bottom,transparent 60%,var(--surface));
     }
-
+ 
     /* progress dots */
     .dots{display:flex;gap:6px;justify-content:center;padding:16px 0 0;}
-    .dot{width:6px;height:6px;border-radius:50%;background:rgba(22,163,74,0.2);transition:all 0.3s;}
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all 0.3s;}
     .dot.active{background:var(--accent);width:20px;border-radius:3px;}
-    .dot.done{background:rgba(22,163,74,0.4);}
-
+    .dot.done{background:rgba(200,255,0,0.4);}
+ 
     .content{padding:24px 28px 28px;}
-
+ 
     .step-num{
       font-family:'Syne Mono',monospace;font-size:0.6rem;
       letter-spacing:0.2em;text-transform:uppercase;
       color:var(--accent);margin-bottom:10px;
     }
-
+ 
     .step-title{font-size:1.4rem;font-weight:800;line-height:1.2;margin-bottom:12px;}
-
-    .step-desc{font-size:0.88rem;line-height:1.6;color:#7a9b80;}
-
+ 
+    .step-desc{font-size:0.88rem;line-height:1.6;color:#aaa;}
+ 
     .actions{display:flex;align-items:center;justify-content:space-between;margin-top:28px;}
-
+ 
     .skip-btn{
       font-family:'Syne Mono',monospace;font-size:0.65rem;
       letter-spacing:0.1em;text-transform:uppercase;
@@ -63,32 +63,32 @@
       padding:8px 0;transition:color 0.2s;
     }
     .skip-btn:hover{color:var(--text);}
-
+ 
     .next-btn{
       display:flex;align-items:center;gap:8px;
       padding:12px 24px;border-radius:30px;
-      background:var(--accent);color:#fff;
+      background:var(--accent);color:#000;
       font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;
       border:none;cursor:pointer;
       transition:opacity 0.2s,transform 0.15s;
     }
     .next-btn:hover{opacity:0.9;}
     .next-btn:active{transform:scale(0.97);}
-
+ 
     .next-btn svg{transition:transform 0.2s;}
     .next-btn:hover svg{transform:translateX(3px);}
-
+ 
     /* done state */
     .done-btn{
       width:100%;padding:14px;border-radius:12px;
-      background:var(--accent);color:#fff;
+      background:var(--accent);color:#000;
       font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;
       border:none;cursor:pointer;margin-top:28px;
       transition:opacity 0.2s,transform 0.15s;
     }
     .done-btn:hover{opacity:0.9;}
     .done-btn:active{transform:scale(0.98);}
-
+ 
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
     @keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
     @keyframes stepIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
@@ -96,21 +96,21 @@
   </style>
 </head>
 <body>
-
+ 
 <div class="overlay">
   <div class="card" id="card">
-
-    <div class="step-visual" id="stepVisual" style="background:#e8f5e9;">
+ 
+    <div class="step-visual" id="stepVisual" style="background:#0d0d0d;">
       <span id="stepEmoji">👋</span>
     </div>
-
+ 
     <div class="dots" id="dots"></div>
-
+ 
     <div class="content">
       <div class="step-num" id="stepNum">Step 1 of 6</div>
       <div class="step-title step-animate" id="stepTitle">Welcome to Bin Buddy</div>
       <div class="step-desc step-animate" id="stepDesc">This app uses AI to recognize the trash and help you decide what to do with it. Let's walk you through everything in 30 seconds.</div>
-
+ 
       <div class="actions" id="actions">
         <button class="skip-btn" onclick="skip()">Skip tutorial</button>
         <button class="next-btn" onclick="next()">
@@ -121,52 +121,52 @@
         </button>
       </div>
     </div>
-
+ 
   </div>
 </div>
-
+ 
 <script>
   const steps = [
     {
       emoji: '👋',
-      bg: '#e8f5e9',
+      bg: '#0d0d0d',
       title: 'Welcome to Vision',
       desc: 'This app uses AI to recognize what\'s in your photos. Let\'s walk you through everything in 30 seconds.'
     },
     {
       emoji: '🔐',
-      bg: '#f0faf0',
+      bg: '#0a0f0a',
       title: 'Create an Account',
       desc: 'First, register with a username, email and password. Already have an account? Just sign in on the login page.'
     },
     {
       emoji: '📷',
-      bg: '#f5f4ef',
+      bg: '#080808',
       title: 'Start the Camera',
       desc: 'On the main screen, tap the big button at the bottom to start your camera. Allow camera access when your browser asks.'
     },
     {
       emoji: '🔄',
-      bg: '#edf7ed',
+      bg: '#0a0a0f',
       title: 'Flip the Camera',
       desc: 'Use the flip button in the top right to switch between your front and back camera anytime.'
     },
     {
       emoji: '🤖',
-      bg: '#f0faf0',
+      bg: '#0f0a00',
       title: 'Analyze an Image',
       desc: 'Point your camera at anything and tap the shutter button. The AI will analyze what it sees and show you a description.'
     },
     {
       emoji: '📋',
-      bg: '#edf7ed',
+      bg: '#0a080f',
       title: 'View Your History',
       desc: 'Every analysis is saved to your profile. Tap Profile in the top right to see all your past analyses anytime.'
     },
   ];
-
+ 
   let current = 0;
-
+ 
   const stepVisual = document.getElementById('stepVisual');
   const stepEmoji = document.getElementById('stepEmoji');
   const stepNum = document.getElementById('stepNum');
@@ -174,7 +174,7 @@
   const stepDesc = document.getElementById('stepDesc');
   const actions = document.getElementById('actions');
   const dotsEl = document.getElementById('dots');
-
+ 
   // Build dots
   steps.forEach((_, i) => {
     const d = document.createElement('div');
@@ -182,31 +182,31 @@
     d.id = 'dot' + i;
     dotsEl.appendChild(d);
   });
-
+ 
   function updateDots() {
     steps.forEach((_, i) => {
       const d = document.getElementById('dot' + i);
       d.className = 'dot' + (i === current ? ' active' : i < current ? ' done' : '');
     });
   }
-
+ 
   function render() {
     const s = steps[current];
     stepVisual.style.background = s.bg;
     stepEmoji.textContent = s.emoji;
     stepNum.textContent = `Step ${current + 1} of ${steps.length}`;
-
+ 
     // animate content
     stepTitle.classList.remove('step-animate');
     stepDesc.classList.remove('step-animate');
     void stepTitle.offsetWidth;
     stepTitle.classList.add('step-animate');
     stepDesc.classList.add('step-animate');
-
+ 
     stepTitle.textContent = s.title;
     stepDesc.textContent = s.desc;
     updateDots();
-
+ 
     // last step — change actions
     if (current === steps.length - 1) {
       actions.innerHTML = `<button class="done-btn" onclick="finish()">Let's Go! 🚀</button>`;
@@ -221,23 +221,24 @@
         </button>`;
     }
   }
-
+ 
   function next() {
     if (current < steps.length - 1) {
       current++;
       render();
     }
   }
-
+ 
   function skip() { finish(); }
-
+ 
   function finish() {
     // Mark tutorial as seen and go to app
     localStorage.setItem('tutorialSeen', '1');
     window.location.href = '/app';
   }
-
+ 
   render();
 </script>
 </body>
 </html>
+<!---->>
