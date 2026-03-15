@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Sort It! - Garbage Sorting Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --accent: #c8ff00;
+            --text: #f5f5f5;
+            --glass: rgba(255,255,255,0.08);
+            --green: #4ade80;
+            --red: #f87171;
+            --orange: #fbbf24;
+            --blue: #60a5fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            width: 100vw;
+            height: 100dvh;
+            position: relative;
+        }
+
+        /* ===== OVERLAY SCREENS ===== */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            background: rgba(10, 10, 30, 0.92);
+            transition: opacity 0.4s ease;
+        }
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 24px;
+            padding: 48px 40px;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+        }
+
+        .card h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        .card h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            font-size: 1.05rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .card .final-score {
+            font-family: 'Syne Mono', monospace;
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin: 16px 0;
+        }
+
+        .card .score-msg {
+            font-size: 1.2rem;
+            color: var(--orange);
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 36px;
+            border: none;
+            border-radius: 14px;
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            margin: 6px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #111;
+        }
+
+        .btn-secondary {
+            background: var(--glass);
+            color: var(--text);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .instructions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .instructions .inst-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+        }
+        .instructions .inst-item img {
+            width: 52px;
+            height: 52px;
+            object-fit: contain;
+        }
+
+        /* ===== GAME SCREEN ===== */
+        #gameScreen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            background-image: url('/game/asset/backgroundfinal.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        #gameScreen.hidden {
+            display: none;
+        }
+
+        /* HUD */
+        #hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            height: 54px;
+            flex-shrink: 0;
+        }
+
+        #scoreDisplay {
+            font-family: 'Syne Mono', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        #timerDisplay {
+            font-family: 'Syne Mono', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text);
+            transition: color 0.3s;
+        }
+        #timerDisplay.urgent {
+            color: var(--red);
+            animation: pulse 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 1; }
+            to { opacity: 0.5; }
+        }
+
+        /* GAME AREA */
+        #gameArea {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* FALLING ITEMS */
+        .falling-item {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            cursor: grab;
+            touch-action: none;
+            z-index: 10;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+            transition: transform 0.1s ease;
+        }
+        .falling-item:active {
+            cursor: grabbing;
+        }
+        .falling-item.dragging {
+            z-index: 200;
+            transform: scale(1.15);
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
+        }
+
+        /* BINS AREA */
+        #binsArea {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 12px;
+            padding: 10px 16px 14px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
+            flex-shrink: 0;
+            z-index: 50;
+        }
+
+        .bin {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+            max-width: 160px;
+            padding: 8px 4px;
+            border-radius: 16px;
+            border: 2px solid transparent;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+        }
+        .bin img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+        }
+        .bin .bin-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .bin.highlight {
+            border-color: var(--accent);
+            box-shadow: 0 0 24px rgba(200, 255, 0, 0.35);
+            transform: scale(1.05);
+        }
+
+        .bin.correct-flash {
+            border-color: var(--green);
+            box-shadow: 0 0 30px rgba(74, 222, 128, 0.5);
+        }
+        .bin.wrong-flash {
+            border-color: var(--red);
+            box-shadow: 0 0 30px rgba(248, 113, 113, 0.5);
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        /* SCORE POPUP */
+        .score-popup {
+            position: absolute;
+            font-family: 'Syne', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            pointer-events: none;
+            z-index: 300;
+            animation: floatUp 0.8s ease-out forwards;
+        }
+        .score-popup.positive { color: var(--green); }
+        .score-popup.negative { color: var(--red); }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            .falling-item { width: 64px; height: 64px; }
+            .bin img { width: 80px; height: 80px; }
+            .card h1 { font-size: 2.2rem; }
+            .card { padding: 32px 24px; }
+            #scoreDisplay, #timerDisplay { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== START SCREEN ===== -->
+    <div id="startScreen" class="overlay">
+        <div class="card">
+            <h1>Sort It!</h1>
+            <p>Drag the falling garbage into the correct bin.<br>Be quick and accurate!</p>
+            <div class="instructions">
+                <div class="inst-item">
+                    <img src="/game/asset/organictrash.png" alt="Organic">
+                    <span>Organic</span>
+                </div>
+                <div class="inst-item">
+                    <img src="/game/asset/papertrash.png" alt="Paper">
+                    <span>Paper</span>
+                </div>
+                <div class="inst-item">
+                    <img src="/game/asset/wastetrash.png" alt="Waste">
+                    <span>Waste</span>
+                </div>
+            </div>
+            <p style="font-size:0.9rem; margin-bottom:16px;">
+                &#x2705; Correct bin = <strong style="color:var(--green)">+100</strong> &nbsp;
+                &#x274C; Wrong bin = <strong style="color:var(--red)">&minus;50</strong>
+            </p>
+            <button id="startBtn" class="btn btn-primary" disabled>Loading...</button>
+        </div>
+    </div>
+
+    <!-- ===== GAME SCREEN ===== -->
+    <div id="gameScreen" class="hidden">
+        <div id="hud">
+            <div id="scoreDisplay">SCORE: 0</div>
+            <div id="timerDisplay">1:00</div>
+        </div>
+        <div id="gameArea"></div>
+        <div id="binsArea">
+            <div class="bin" data-category="organics">
+                <img src="/game/asset/organictrash.png" alt="Organic Bin">
+                <span class="bin-label">Organic</span>
+            </div>
+            <div class="bin" data-category="paper">
+                <img src="/game/asset/papertrash.png" alt="Paper Bin">
+                <span class="bin-label">Paper</span>
+            </div>
+            <div class="bin" data-category="waste">
+                <img src="/game/asset/wastetrash.png" alt="Waste Bin">
+                <span class="bin-label">Waste</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== GAME OVER SCREEN ===== -->
+    <div id="gameOverScreen" class="overlay hidden">
+        <div class="card">
+            <h2>Game Over!</h2>
+            <div class="final-score" id="finalScore">0</div>
+            <div class="score-msg" id="scoreMsg">Good job!</div>
+            <div>
+                <button id="restartBtn" class="btn btn-primary">Play Again</button>
+                <button id="homeBtn" class="btn btn-secondary">Back to Home</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        // ===== ELEMENTS =====
+        const startScreen = document.getElementById('startScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const homeBtn = document.getElementById('homeBtn');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const gameArea = document.getElementById('gameArea');
+        const finalScoreEl = document.getElementById('finalScore');
+        const scoreMsgEl = document.getElementById('scoreMsg');
+        const bins = document.querySelectorAll('.bin');
+
+        // ===== STATE =====
+        let allItems = [];
+        let score = 0;
+        let timeLeft = 60;
+        let gameRunning = false;
+        let animFrameId = null;
+        let spawnTimer = null;
+        let countdownTimer = null;
+        let fallingItems = [];
+        let baseFallSpeed = 1.5;
+        let spawnDelay = 2000;
+        let isDragging = false;
+        let dragItem = null;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+        const MAX_ITEMS = 6;
+
+        // ===== LOAD ITEMS =====
+        fetch('/game/api/items')
+            .then(r => r.json())
+            .then(data => {
+                allItems = data.items;
+                // Preload first batch of images
+                const preloadCount = Math.min(30, allItems.length);
+                for (let i = 0; i < preloadCount; i++) {
+                    const img = new Image();
+                    img.src = allItems[i].url;
+                }
+                startBtn.textContent = 'Start Game';
+                startBtn.disabled = false;
+            })
+            .catch(() => {
+                startBtn.textContent = 'Error loading';
+            });
+
+        // ===== AUDIO =====
+        const correctSound = new Audio('/game/asset/correctsound.mp3');
+        const wrongSound = new Audio('/game/asset/wrongsound.mp3');
+
+        function playSound(sound) {
+            correctSound.pause();
+            correctSound.currentTime = 0;
+            wrongSound.pause();
+            wrongSound.currentTime = 0;
+            sound.play();
+        }
+
+        // ===== SCREEN TRANSITIONS =====
+        startBtn.addEventListener('click', () => {
+            startScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            startGame();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            gameOverScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            startGame();
+        });
+
+        homeBtn.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+
+        // ===== START GAME =====
+        function startGame() {
+            score = 0;
+            timeLeft = 60;
+            baseFallSpeed = 1.5;
+            spawnDelay = 2000;
+            gameRunning = true;
+            fallingItems = [];
+            isDragging = false;
+            dragItem = null;
+
+            // Clear any leftover items
+            gameArea.innerHTML = '';
+
+            updateScore();
+            updateTimer();
+
+            // Start countdown
+            countdownTimer = setInterval(() => {
+                timeLeft--;
+                updateTimer();
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+                // Difficulty scaling every 10 seconds
+                if (timeLeft > 0 && timeLeft % 10 === 0) {
+                    updateDifficulty();
+                }
+            }, 1000);
+
+            // Start spawning
+            startSpawning();
+
+            // Start animation loop
+            animFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        // ===== DIFFICULTY =====
+        function updateDifficulty() {
+            const elapsed = 60 - timeLeft;
+            const tier = Math.floor(elapsed / 10);
+            baseFallSpeed = 1.5 + tier * 0.3;
+            spawnDelay = Math.max(800, 2000 - tier * 200);
+            startSpawning(); // restart with new interval
+        }
+
+        function startSpawning() {
+            if (spawnTimer) clearInterval(spawnTimer);
+            spawnTimer = setInterval(spawnItem, spawnDelay);
+        }
+
+        // ===== SPAWN =====
+        function spawnItem() {
+            if (!gameRunning) return;
+            if (fallingItems.length >= MAX_ITEMS) return;
+
+            const itemData = allItems[Math.floor(Math.random() * allItems.length)];
+            const areaRect = gameArea.getBoundingClientRect();
+            const itemSize = window.innerWidth <= 480 ? 64 : 80;
+
+            const el = document.createElement('img');
+            el.src = itemData.url;
+            el.className = 'falling-item';
+            el.dataset.category = itemData.category;
+            el.draggable = false;
+
+            const maxX = areaRect.width - itemSize - 8;
+            const startX = Math.random() * maxX + 4;
+
+            el.style.left = startX + 'px';
+            el.style.top = '-60px';
+            el.style.width = itemSize + 'px';
+            el.style.height = itemSize + 'px';
+
+            // Attach drag listeners
+            el.addEventListener('mousedown', onDragStart);
+            el.addEventListener('touchstart', onDragStart, { passive: false });
+
+            gameArea.appendChild(el);
+            fallingItems.push({ el: el, y: -60, dragging: false, category: itemData.category });
+        }
+
+        // ===== GAME LOOP =====
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            const areaRect = gameArea.getBoundingClientRect();
+            const areaHeight = areaRect.height;
+
+            for (let i = fallingItems.length - 1; i >= 0; i--) {
+                const item = fallingItems[i];
+                if (item.dragging) continue;
+
+                item.y += baseFallSpeed;
+                item.el.style.top = item.y + 'px';
+
+                // Fell off bottom - no penalty, just remove
+                if (item.y > areaHeight + 10) {
+                    removeItem(i);
+                }
+            }
+
+            animFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function removeItem(index) {
+            const item = fallingItems[index];
+            if (item.el.parentNode) item.el.parentNode.removeChild(item.el);
+            fallingItems.splice(index, 1);
+        }
+
+        // ===== DRAG & DROP =====
+        function onDragStart(e) {
+            if (!gameRunning || isDragging) return;
+            e.preventDefault();
+
+            const el = e.currentTarget;
+            const touch = e.touches ? e.touches[0] : e;
+            const rect = el.getBoundingClientRect();
+            const areaRect = gameArea.getBoundingClientRect();
+
+            dragOffsetX = touch.clientX - rect.left;
+            dragOffsetY = touch.clientY - rect.top;
+
+            // Find the falling item data
+            dragItem = fallingItems.find(fi => fi.el === el);
+            if (!dragItem) return;
+
+            dragItem.dragging = true;
+            isDragging = true;
+            el.classList.add('dragging');
+
+            document.addEventListener('mousemove', onDragMove);
+            document.addEventListener('mouseup', onDragEnd);
+            document.addEventListener('touchmove', onDragMove, { passive: false });
+            document.addEventListener('touchend', onDragEnd);
+        }
+
+        function onDragMove(e) {
+            if (!dragItem) return;
+            e.preventDefault();
+
+            const touch = e.touches ? e.touches[0] : e;
+            const areaRect = gameArea.getBoundingClientRect();
+
+            let newX = touch.clientX - areaRect.left - dragOffsetX;
+            let newY = touch.clientY - areaRect.top - dragOffsetY;
+
+            // Clamp within game area
+            const itemSize = parseInt(dragItem.el.style.width);
+            newX = Math.max(0, Math.min(newX, areaRect.width - itemSize));
+            newY = Math.max(-20, Math.min(newY, areaRect.height + 40));
+
+            dragItem.el.style.left = newX + 'px';
+            dragItem.el.style.top = newY + 'px';
+            dragItem.y = newY;
+
+            // Highlight bins
+            const itemCenterX = touch.clientX;
+            const itemCenterY = touch.clientY;
+
+            bins.forEach(bin => {
+                const br = bin.getBoundingClientRect();
+                if (itemCenterX >= br.left && itemCenterX <= br.right &&
+                    itemCenterY >= br.top && itemCenterY <= br.bottom) {
+                    bin.classList.add('highlight');
+                } else {
+                    bin.classList.remove('highlight');
+                }
+            });
+        }
+
+        function onDragEnd(e) {
+            if (!dragItem) return;
+
+            document.removeEventListener('mousemove', onDragMove);
+            document.removeEventListener('mouseup', onDragEnd);
+            document.removeEventListener('touchmove', onDragMove);
+            document.removeEventListener('touchend', onDragEnd);
+
+            const el = dragItem.el;
+            el.classList.remove('dragging');
+
+            // Get drop position
+            let dropX, dropY;
+            if (e.changedTouches) {
+                dropX = e.changedTouches[0].clientX;
+                dropY = e.changedTouches[0].clientY;
+            } else {
+                dropX = e.clientX;
+                dropY = e.clientY;
+            }
+
+            // Check which bin
+            let droppedBin = null;
+            bins.forEach(bin => {
+                bin.classList.remove('highlight');
+                const br = bin.getBoundingClientRect();
+                if (dropX >= br.left && dropX <= br.right &&
+                    dropY >= br.top && dropY <= br.bottom) {
+                    droppedBin = bin;
+                }
+            });
+
+            const itemIndex = fallingItems.indexOf(dragItem);
+
+            if (droppedBin) {
+                const binCat = droppedBin.dataset.category;
+                const itemCat = dragItem.category;
+
+                if (binCat === itemCat) {
+                    // Correct!
+                    score += 100;
+                    showScorePopup(el, '+100', true);
+                    flashBin(droppedBin, 'correct-flash');
+                    playSound(correctSound);
+                } else {
+                    // Wrong
+                    score = Math.max(0, score - 50);
+                    showScorePopup(el, '-50', false);
+                    flashBin(droppedBin, 'wrong-flash');
+                    playSound(wrongSound);
+                }
+
+                updateScore();
+                if (itemIndex >= 0) removeItem(itemIndex);
+            } else {
+                // Not on a bin - resume falling
+                dragItem.dragging = false;
+            }
+
+            isDragging = false;
+            dragItem = null;
+        }
+
+        // ===== VISUAL FEEDBACK =====
+        function showScorePopup(el, text, positive) {
+            const popup = document.createElement('div');
+            popup.className = 'score-popup ' + (positive ? 'positive' : 'negative');
+            popup.textContent = text;
+
+            const rect = el.getBoundingClientRect();
+            const areaRect = gameArea.getBoundingClientRect();
+            popup.style.left = (rect.left - areaRect.left + rect.width / 2 - 20) + 'px';
+            popup.style.top = (rect.top - areaRect.top) + 'px';
+
+            gameArea.appendChild(popup);
+            setTimeout(() => {
+                if (popup.parentNode) popup.parentNode.removeChild(popup);
+            }, 800);
+        }
+
+        function flashBin(bin, className) {
+            bin.classList.add(className);
+            setTimeout(() => bin.classList.remove(className), 400);
+        }
+
+        // ===== HUD =====
+        function updateScore() {
+            scoreDisplay.textContent = 'SCORE: ' + score;
+        }
+
+        function updateTimer() {
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            timerDisplay.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+
+            if (timeLeft <= 10) {
+                timerDisplay.classList.add('urgent');
+            } else {
+                timerDisplay.classList.remove('urgent');
+            }
+        }
+
+        // ===== END GAME =====
+        function endGame() {
+            gameRunning = false;
+
+            if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+            if (spawnTimer) { clearInterval(spawnTimer); spawnTimer = null; }
+            if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+
+            // Clean up drag state
+            document.removeEventListener('mousemove', onDragMove);
+            document.removeEventListener('mouseup', onDragEnd);
+            document.removeEventListener('touchmove', onDragMove);
+            document.removeEventListener('touchend', onDragEnd);
+            isDragging = false;
+            dragItem = null;
+
+            // Clear items
+            fallingItems = [];
+            gameArea.innerHTML = '';
+
+            // Show game over
+            finalScoreEl.textContent = score;
+
+            let msg;
+            if (score >= 2500) msg = 'Recycling Champion! \u{1F3C6}';
+            else if (score >= 1500) msg = 'Amazing Sorter! \u{1F31F}';
+            else if (score >= 500) msg = 'Good Job! \u{1F44D}';
+            else msg = 'Keep Practicing! \u{1F4AA}';
+            scoreMsgEl.textContent = msg;
+
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+        }
+
+    })();
+    </script>
+</body>
+</html>
